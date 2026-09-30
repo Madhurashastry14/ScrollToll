@@ -4,25 +4,10 @@ import { apiRequest } from "../services/api";
 
 const scrollOptions = [2, 4, 6, 8, 10];
 
-const videos = [
-  {
-    id: 1,
-    title: "Interesting science fact",
-    description: "A quick fact to learn something new.",
-  },
-  {
-    id: 2,
-    title: "A tiny productivity idea",
-    description: "One small idea you can try today.",
-  },
-  {
-    id: 3,
-    title: "Did you know?",
-    description: "A short piece of interesting information.",
-  },
-];
-
 function ScrollFeed() {
+  const [videos, setVideos] = useState([]);
+  const [videosLoading, setVideosLoading] = useState(true);
+  const [videoError, setVideoError] = useState("");
   const navigate = useNavigate();
 
   const [balance, setBalance] = useState(null);
@@ -33,6 +18,37 @@ function ScrollFeed() {
   const [unlocking, setUnlocking] = useState(false);
   const [error, setError] = useState("");
   const [sessionId, setSessionId] = useState(null);
+  useEffect(() => {
+    const loadVideos = async () => {
+      try {
+        setVideosLoading(true);
+        setVideoError("");
+
+        const data = await apiRequest("/videos?query=science facts shorts");
+
+        setVideos(data.videos);
+      } catch (err) {
+        console.error("Failed to load videos:", err);
+        setVideoError(err.message);
+      } finally {
+        setVideosLoading(false);
+      }
+    };
+
+    loadVideos();
+  }, []);
+  useEffect(() => {
+    const loadBalance = async () => {
+      try {
+        const data = await apiRequest("/scroll/balance");
+        setBalance(data.balance);
+      } catch (err) {
+        console.error("Failed to load token balance:", err);
+      }
+    };
+
+    loadBalance();
+  }, []);
   const endSession = useCallback(
     async (reason = "timer_expired") => {
       try {
@@ -56,25 +72,6 @@ function ScrollFeed() {
     },
     [sessionId],
   );
-  useEffect(() => {
-    if (!sessionStarted) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setRemainingSeconds((previous) => {
-        if (previous <= 1) {
-          clearInterval(timer);
-          endSession("timer_expired");
-          return 0;
-        }
-
-        return previous - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [sessionStarted, endSession]);
 
   useEffect(() => {
     if (!sessionStarted) {
@@ -109,12 +106,7 @@ function ScrollFeed() {
       });
 
       setBalance(data.balance);
-
-      const sessionData = await apiRequest("/scroll/start", {
-        method: "POST",
-      });
-
-      setSessionId(sessionData.sessionId);
+      setSessionId(data.sessionId);
       setRemainingSeconds(selectedMinutes * 60);
       setSessionStarted(true);
     } catch (err) {
@@ -252,24 +244,56 @@ function ScrollFeed() {
       </header>
 
       <main className="mx-auto max-w-xl px-4 py-6">
-        <div className="space-y-6">
-          {videos.map((video) => (
-            <article
-              key={video.id}
-              className="overflow-hidden rounded-2xl bg-gray-900"
-            >
-              <div className="aspect-video bg-gray-800" />
+        {videosLoading && (
+          <div className="rounded-2xl bg-gray-900 p-8 text-center">
+            <p className="text-gray-400">Loading videos...</p>
+          </div>
+        )}
 
-              <div className="p-5">
-                <h2 className="text-lg font-semibold">{video.title}</h2>
+        {videoError && (
+          <div className="rounded-2xl bg-red-950 p-6 text-center">
+            <p className="text-red-300">{videoError}</p>
+          </div>
+        )}
 
-                <p className="mt-2 text-sm text-gray-400">
-                  {video.description}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
+        {!videosLoading && !videoError && videos.length === 0 && (
+          <div className="rounded-2xl bg-gray-900 p-8 text-center">
+            <p className="text-gray-400">No videos found.</p>
+          </div>
+        )}
+
+        {!videosLoading && !videoError && videos.length > 0 && (
+          <div className="space-y-6">
+            {videos.map((video) => (
+              <article
+                key={video.videoId}
+                className="overflow-hidden rounded-2xl bg-gray-900"
+              >
+                <div className="aspect-video bg-gray-800">
+                  <iframe
+                    src={`${video.embedUrl}?rel=0`}
+                    title={video.title}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+
+                <div className="p-5">
+                  <h2 className="text-lg font-semibold">{video.title}</h2>
+
+                  <p className="mt-2 text-sm text-gray-400">
+                    {video.description}
+                  </p>
+
+                  <p className="mt-3 text-xs text-gray-500">
+                    {video.channelTitle}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
 
         {remainingSeconds === 0 && (
           <div className="mt-8 rounded-2xl bg-white p-6 text-center text-black">
