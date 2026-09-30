@@ -131,7 +131,11 @@ const unlockScroll = async (req, res) => {
 
   try {
     const userId = req.user.userId;
-    const { scrollMinutes } = req.body;
+    const {
+      scrollMinutes,
+      intentionality = "unknown",
+      reason = null,
+    } = req.body;
 
     const allowedDurations = [2, 4, 6, 8, 10];
 
@@ -144,6 +148,13 @@ const unlockScroll = async (req, res) => {
     if (!allowedDurations.includes(scrollMinutes)) {
       return res.status(400).json({
         message: "Invalid scroll duration",
+      });
+    }
+    const validIntentionality = ["intentional", "habitual", "unknown"];
+
+    if (!validIntentionality.includes(intentionality)) {
+      return res.status(400).json({
+        message: "Invalid intentionality",
       });
     }
 
@@ -195,11 +206,13 @@ const unlockScroll = async (req, res) => {
       [userId, 1, scrollMinutes],
     );
 
+    const allowedSeconds = scrollMinutes * 60;
+
     const [sessionResult] = await connection.query(
       `INSERT INTO scroll_sessions
-       (user_id, started_at, duration_seconds, intentionality)
-       VALUES (?, NOW(), 0, 'unknown')`,
-      [userId],
+   (user_id, started_at, duration_seconds, allowed_seconds, intentionality, reason)
+   VALUES (?, NOW(), 0, ?, ?, ?)`,
+      [userId, allowedSeconds, intentionality, reason],
     );
 
     await connection.commit();
@@ -227,9 +240,89 @@ const unlockScroll = async (req, res) => {
     connection.release();
   }
 };
+const getScrollSessionStatus = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const sessionId = Number(req.params.sessionId);
+
+    if (!Number.isInteger(sessionId)) {
+      return res.status(400).json({
+        message: "Invalid session ID",
+      });
+    }
+
+    const [rows] = await pool.query(
+      `SELECT
+         id,
+         started_at,
+         ended_at,
+         duration_seconds,
+         allowed_seconds,
+         intentionality
+       FROM scroll_sessions
+       WHERE id = ? AND user_id = ?`,
+      [sessionId, userId],
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "Scroll session not found",
+      });
+    }
+
+    const session = rows[0];
+
+    if (session.ended_at) {
+      return res.json({
+        active: false,
+        sessionId: session.id,
+        durationSeconds: session.duration_seconds,
+      });
+    }
+
+    const elapsedSeconds = Math.floor(
+      (Date.now() - new Date(session.started_at).getTime()) / 1000,
+    );
+
+    const allowedSeconds = Number(session.allowed_seconds);
+
+    if (elapsedSeconds >= allowedSeconds) {
+      await pool.query(
+        `UPDATE scroll_sessions
+         SET ended_at = NOW(),
+             duration_seconds = ?,
+             intentionality = 'intentional',
+             reason = 'timer_expired'
+         WHERE id = ?
+           AND user_id = ?
+           AND ended_at IS NULL`,
+        [allowedSeconds, sessionId, userId],
+      );
+
+      return res.json({
+        active: false,
+        sessionId,
+        durationSeconds: allowedSeconds,
+      });
+    }
+
+    return res.json({
+      active: true,
+      sessionId,
+      remainingSeconds: allowedSeconds - elapsedSeconds,
+    });
+  } catch (error) {
+    console.error("Scroll session status error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
 module.exports = {
   unlockScroll,
   getScrollBalance,
   startScrollSession,
   endScrollSession,
+  getScrollSessionStatus,
 };

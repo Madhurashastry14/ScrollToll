@@ -1,14 +1,36 @@
-import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
 const scrollOptions = [2, 4, 6, 8, 10];
+
+const scrollReasons = [
+  {
+    value: "specific_content",
+    label: "I have something specific to watch",
+    intentionality: "intentional",
+  },
+  {
+    value: "quick_break",
+    label: "I want to take a quick break",
+    intentionality: "intentional",
+  },
+  {
+    value: "bored_checking",
+    label: "I'm bored or just checking",
+    intentionality: "habitual",
+  },
+  {
+    value: "just_browsing",
+    label: "I'm just browsing",
+    intentionality: "habitual",
+  },
+];
 
 function ScrollFeed() {
   const [videos, setVideos] = useState([]);
   const [videosLoading, setVideosLoading] = useState(true);
   const [videoError, setVideoError] = useState("");
-  const navigate = useNavigate();
 
   const [balance, setBalance] = useState(null);
   const [selectedMinutes, setSelectedMinutes] = useState(2);
@@ -18,6 +40,8 @@ function ScrollFeed() {
   const [unlocking, setUnlocking] = useState(false);
   const [error, setError] = useState("");
   const [sessionId, setSessionId] = useState(null);
+  const [scrollReason, setScrollReason] = useState("");
+
   useEffect(() => {
     const loadVideos = async () => {
       try {
@@ -37,6 +61,7 @@ function ScrollFeed() {
 
     loadVideos();
   }, []);
+
   useEffect(() => {
     const loadBalance = async () => {
       try {
@@ -49,29 +74,33 @@ function ScrollFeed() {
 
     loadBalance();
   }, []);
-  const endSession = useCallback(
-    async (reason = "timer_expired") => {
+
+  useEffect(() => {
+    if (!sessionStarted || !sessionId) {
+      return;
+    }
+
+    const verifySession = async () => {
       try {
-        if (sessionId) {
-          await apiRequest("/scroll/end", {
-            method: "POST",
-            body: JSON.stringify({
-              sessionId,
-              intentionality: "intentional",
-              reason,
-            }),
-          });
+        const data = await apiRequest(`/scroll/session/${sessionId}`);
+
+        if (!data.active) {
+          setSessionStarted(false);
+          setRemainingSeconds(0);
+          setSessionId(null);
+          setScrollReason("");
         }
       } catch (err) {
-        console.error("Failed to end scroll session:", err);
-      } finally {
-        setSessionStarted(false);
-        setRemainingSeconds(0);
-        setSessionId(null);
+        console.error("Failed to verify scroll session:", err);
       }
-    },
-    [sessionId],
-  );
+    };
+
+    verifySession();
+
+    const interval = setInterval(verifySession, 10000);
+
+    return () => clearInterval(interval);
+  }, [sessionStarted, sessionId]);
 
   useEffect(() => {
     if (!sessionStarted) {
@@ -82,7 +111,6 @@ function ScrollFeed() {
       setRemainingSeconds((previous) => {
         if (previous <= 1) {
           clearInterval(timer);
-          endSession("timer_expired");
           return 0;
         }
 
@@ -91,17 +119,28 @@ function ScrollFeed() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [sessionStarted, endSession]);
+  }, [sessionStarted]);
 
   const unlockScroll = async () => {
+    if (!scrollReason) {
+      setError("Please choose why you want to scroll.");
+      return;
+    }
+
     try {
       setUnlocking(true);
       setError("");
+
+      const selectedReason = scrollReasons.find(
+        (item) => item.value === scrollReason,
+      );
 
       const data = await apiRequest("/scroll/unlock", {
         method: "POST",
         body: JSON.stringify({
           scrollMinutes: selectedMinutes,
+          intentionality: selectedReason.intentionality,
+          reason: selectedReason.value,
         }),
       });
 
@@ -123,7 +162,9 @@ function ScrollFeed() {
           method: "POST",
           body: JSON.stringify({
             sessionId,
-            intentionality: "intentional",
+            intentionality:
+              scrollReasons.find((item) => item.value === scrollReason)
+                ?.intentionality || "unknown",
             reason: "user_exit",
           }),
         });
@@ -134,6 +175,7 @@ function ScrollFeed() {
       setSessionStarted(false);
       setRemainingSeconds(0);
       setSessionId(null);
+      setScrollReason("");
     }
   };
 
@@ -212,6 +254,34 @@ function ScrollFeed() {
             </div>
           </div>
 
+          <div className="mt-8">
+            <p className="text-sm font-medium">Why are you scrolling?</p>
+
+            <div className="mt-4 space-y-3">
+              {scrollReasons.map((reason) => {
+                const selected = scrollReason === reason.value;
+
+                return (
+                  <button
+                    key={reason.value}
+                    type="button"
+                    onClick={() => {
+                      setScrollReason(reason.value);
+                      setError("");
+                    }}
+                    className={`w-full rounded-xl border p-4 text-left transition ${
+                      selected
+                        ? "border-black bg-gray-100"
+                        : "border-gray-200 hover:border-gray-400"
+                    }`}
+                  >
+                    <p className="font-medium">{reason.label}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <button
             type="button"
             onClick={unlockScroll}
@@ -243,73 +313,59 @@ function ScrollFeed() {
         </button>
       </header>
 
-      <main className="mx-auto max-w-xl px-4 py-6">
+      <main className="h-[calc(100vh-73px)] snap-y snap-mandatory overflow-y-auto">
         {videosLoading && (
-          <div className="rounded-2xl bg-gray-900 p-8 text-center">
+          <div className="flex h-full items-center justify-center">
             <p className="text-gray-400">Loading videos...</p>
           </div>
         )}
 
         {videoError && (
-          <div className="rounded-2xl bg-red-950 p-6 text-center">
-            <p className="text-red-300">{videoError}</p>
+          <div className="flex h-full items-center justify-center px-6">
+            <div className="rounded-2xl bg-red-950 p-6 text-center">
+              <p className="text-red-300">{videoError}</p>
+            </div>
           </div>
         )}
 
         {!videosLoading && !videoError && videos.length === 0 && (
-          <div className="rounded-2xl bg-gray-900 p-8 text-center">
+          <div className="flex h-full items-center justify-center">
             <p className="text-gray-400">No videos found.</p>
           </div>
         )}
 
-        {!videosLoading && !videoError && videos.length > 0 && (
-          <div className="space-y-6">
-            {videos.map((video) => (
-              <article
-                key={video.videoId}
-                className="overflow-hidden rounded-2xl bg-gray-900"
-              >
-                <div className="aspect-video bg-gray-800">
-                  <iframe
-                    src={`${video.embedUrl}?rel=0`}
-                    title={video.title}
-                    className="h-full w-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  />
-                </div>
-
-                <div className="p-5">
-                  <h2 className="text-lg font-semibold">{video.title}</h2>
-
-                  <p className="mt-2 text-sm text-gray-400">
-                    {video.description}
-                  </p>
-
-                  <p className="mt-3 text-xs text-gray-500">
-                    {video.channelTitle}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-
-        {remainingSeconds === 0 && (
-          <div className="mt-8 rounded-2xl bg-white p-6 text-center text-black">
-            <h2 className="text-xl font-bold">
-              Your scroll session has ended.
-            </h2>
-
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="mt-5 rounded-lg bg-black px-5 py-2.5 font-medium text-white"
+        {!videosLoading &&
+          !videoError &&
+          videos.map((video) => (
+            <article
+              key={video.videoId}
+              className="relative h-[calc(100vh-73px)] snap-start"
             >
-              Back to Dashboard
-            </button>
-          </div>
-        )}
+              <div className="absolute inset-0">
+                <iframe
+                  src={`${video.embedUrl}?rel=0`}
+                  title={video.title}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent p-6 pt-24">
+                <h2 className="max-w-lg text-lg font-semibold">
+                  {video.title}
+                </h2>
+
+                <p className="mt-2 max-w-lg text-sm text-gray-300">
+                  {video.description}
+                </p>
+
+                <p className="mt-3 text-xs text-gray-400">
+                  {video.channelTitle}
+                </p>
+              </div>
+            </article>
+          ))}
       </main>
     </div>
   );
