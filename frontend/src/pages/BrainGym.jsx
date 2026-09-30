@@ -1,212 +1,333 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { apiRequest } from "../services/api";
-const questions = [
+
+const domains = [
   {
-    question: "What is the output of 2 + 3 × 4?",
-    options: ["20", "14", "24", "10"],
-    answer: "14",
+    id: "logic",
+    name: "Logic",
+    description: "Test deduction, reasoning, and problem-solving.",
+    icon: "🧩",
   },
   {
-    question: "Which data structure follows FIFO?",
-    options: ["Stack", "Queue", "Tree", "Graph"],
-    answer: "Queue",
+    id: "patterns",
+    name: "Patterns",
+    description: "Find sequences, relationships, and patterns.",
+    icon: "🔢",
   },
   {
-    question: "Which HTTP method is commonly used to retrieve data?",
-    options: ["POST", "PUT", "GET", "DELETE"],
-    answer: "GET",
+    id: "quick_math",
+    name: "Quick Math",
+    description: "Challenge your mental calculation speed.",
+    icon: "➗",
+  },
+  {
+    id: "memory",
+    name: "Memory",
+    description: "Test your short-term recall.",
+    icon: "🧠",
+  },
+  {
+    id: "attention",
+    name: "Attention",
+    description: "Test your observation and concentration.",
+    icon: "👀",
   },
 ];
 
+const getOptions = (question) => [
+  { label: "A", value: question.option_a },
+  { label: "B", value: question.option_b },
+  { label: "C", value: question.option_c },
+  { label: "D", value: question.option_d },
+];
+
 function BrainGym() {
+  const [selectedDomain, setSelectedDomain] = useState(null);
+  const [attemptId, setAttemptId] = useState(null);
+  const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [score, setScore] = useState(0);
-  const [completed, setCompleted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [reward, setReward] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [result, setResult] = useState(null);
 
-  const question = questions[currentQuestion];
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleAnswer = (option) => {
-    if (selectedAnswer) {
-      return;
-    }
-
-    setSelectedAnswer(option);
-
-    if (option === question.answer) {
-      setScore((previousScore) => previousScore + 1);
-    }
-  };
-
-  const handleNext = async () => {
-    if (currentQuestion !== questions.length - 1) {
-      setCurrentQuestion((previousQuestion) => previousQuestion + 1);
-      setSelectedAnswer(null);
-      return;
-    }
-
-    const finalScore = score + (selectedAnswer === question.answer ? 1 : 0);
-
-    setSubmitting(true);
-
+  const startQuiz = async (domain) => {
     try {
-      const data = await apiRequest("/activities/brain-gym", {
+      setLoading(true);
+      setError("");
+
+      const data = await apiRequest("/activities/brain-gym/start", {
         method: "POST",
         body: JSON.stringify({
-          questionsAnswered: questions.length,
-          correctAnswers: finalScore,
+          domain,
         }),
       });
 
-      setReward(data);
-      setCompleted(true);
-    } catch (error) {
-      console.error("Brain Gym submission failed:", error);
+      setSelectedDomain(domain);
+      setAttemptId(data.attemptId);
+      setQuestions(data.questions);
+      setCurrentQuestion(0);
+      setAnswers({});
+      setResult(null);
+    } catch (err) {
+      setError(err.message);
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
-  if (completed) {
+  const selectAnswer = (questionId, answer) => {
+    setAnswers((previousAnswers) => ({
+      ...previousAnswers,
+      [questionId]: answer,
+    }));
+  };
+
+  const nextQuestion = () => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion((previous) => previous + 1);
+    }
+  };
+
+  const previousQuestion = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion((previous) => previous - 1);
+    }
+  };
+
+  const submitQuiz = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const formattedAnswers = questions.map((question) => ({
+        questionId: question.id,
+        answer: answers[question.id],
+      }));
+
+      const data = await apiRequest("/activities/brain-gym/submit", {
+        method: "POST",
+        body: JSON.stringify({
+          attemptId,
+          answers: formattedAnswers,
+        }),
+      });
+
+      setResult(data.result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const restart = () => {
+    setSelectedDomain(null);
+    setAttemptId(null);
+    setQuestions([]);
+    setCurrentQuestion(0);
+    setAnswers({});
+    setResult(null);
+    setError("");
+  };
+
+  if (!selectedDomain) {
     return (
-      <div className="min-h-screen px-6 py-10">
-        <div className="mx-auto max-w-2xl">
-          <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-            <p className="text-sm font-medium text-gray-500">
-              Brain Gym Complete
-            </p>
+      <div className="mx-auto max-w-5xl px-6 py-12">
+        <Link
+          to="/dashboard"
+          className="text-sm text-gray-500 hover:text-gray-900"
+        >
+          ← Back to Dashboard
+        </Link>
 
-            <h1 className="mt-3 text-3xl font-bold text-gray-900">
-              Great job!
-            </h1>
+        <div className="mt-10">
+          <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
+            Brain Gym
+          </p>
 
-            <p className="mt-4 text-gray-600">
-              You answered{" "}
-              <span className="font-semibold text-gray-900">
-                {score} out of {questions.length}
-              </span>{" "}
-              questions correctly.
-            </p>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight">
+            Choose your challenge
+          </h1>
 
-            {reward && (
-              <div className="mt-6 rounded-xl bg-gray-50 p-5">
-                <p className="text-sm text-gray-500">Tokens earned</p>
+          <p className="mt-4 max-w-2xl text-gray-600">
+            Pick a domain and complete a short challenge to earn Scroll Tokens.
+          </p>
+        </div>
 
-                <p className="mt-1 text-3xl font-bold text-gray-900">
-                  +{reward.tokensEarned}
-                </p>
-
-                <p className="mt-2 text-sm text-gray-500">
-                  Current balance: {reward.balance}
-                </p>
-              </div>
-            )}
-
-            <button
-              onClick={() => {
-                setCurrentQuestion(0);
-                setSelectedAnswer(null);
-                setReward(null);
-                setCompleted(false);
-              }}
-              className="mt-8 rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:opacity-80"
-            >
-              Try Again
-            </button>
+        {error && (
+          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {error}
           </div>
+        )}
+
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {domains.map((domain) => (
+            <button
+              key={domain.id}
+              type="button"
+              onClick={() => startQuiz(domain.id)}
+              disabled={loading}
+              className="rounded-2xl border border-gray-200 bg-white p-6 text-left transition hover:-translate-y-1 hover:border-gray-400 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <div className="text-3xl">{domain.icon}</div>
+
+              <h2 className="mt-5 text-xl font-bold">{domain.name}</h2>
+
+              <p className="mt-2 text-sm leading-6 text-gray-600">
+                {domain.description}
+              </p>
+
+              <p className="mt-5 text-sm font-medium">Start challenge →</p>
+            </button>
+          ))}
         </div>
       </div>
     );
   }
 
+  if (result) {
+    return (
+      <div className="mx-auto max-w-2xl px-6 py-12">
+        <Link
+          to="/dashboard"
+          className="text-sm text-gray-500 hover:text-gray-900"
+        >
+          ← Back to Dashboard
+        </Link>
+
+        <div className="mt-10 rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
+            Brain Gym Complete
+          </p>
+
+          <h1 className="mt-4 text-4xl font-bold">
+            {result.correctAnswers}/{result.questionsAnswered}
+          </h1>
+
+          <p className="mt-2 text-gray-600">Correct answers</p>
+
+          <div className="mt-8 rounded-xl bg-gray-50 p-5">
+            <p className="text-sm text-gray-500">Tokens earned</p>
+
+            <p className="mt-1 text-3xl font-bold">+{result.tokensEarned}</p>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Current balance: {result.balance}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={restart}
+            className="mt-8 rounded-lg bg-black px-5 py-2.5 font-medium text-white transition hover:opacity-80"
+          >
+            Try another challenge
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const question = questions[currentQuestion];
+  const selectedAnswer = answers[question.id];
+
+  const isLastQuestion = currentQuestion === questions.length - 1;
+
   return (
-    <div className="min-h-screen px-6 py-10">
-      <div className="mx-auto max-w-2xl">
-        {/* Header */}
-        <div>
-          <p className="text-sm font-medium text-gray-500">
-            Productivity Activity
-          </p>
+    <div className="mx-auto max-w-3xl px-6 py-12">
+      <Link
+        to="/dashboard"
+        className="text-sm text-gray-500 hover:text-gray-900"
+      >
+        ← Back to Dashboard
+      </Link>
 
-          <h1 className="mt-1 text-3xl font-bold text-gray-900">Brain Gym</h1>
+      <div className="mt-10">
+        <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
+          {domains.find((domain) => domain.id === selectedDomain)?.name}
+        </p>
 
-          <p className="mt-2 text-gray-600">
-            Give your brain a quick workout before you scroll.
-          </p>
+        <div className="mt-3 flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Brain Gym</h1>
+
+          <span className="text-sm text-gray-500">
+            {currentQuestion + 1} / {questions.length}
+          </span>
         </div>
 
-        {/* Progress */}
-        <div className="mt-8">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-gray-700">
-              Question {currentQuestion + 1} of {questions.length}
-            </span>
-
-            <span className="text-gray-500">Score: {score}</span>
-          </div>
-
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-gray-200">
-            <div
-              className="h-full rounded-full bg-black transition-all"
-              style={{
-                width: `${((currentQuestion + 1) / questions.length) * 100}%`,
-              }}
-            />
-          </div>
+        <div className="mt-6 h-2 overflow-hidden rounded-full bg-gray-100">
+          <div
+            className="h-full bg-black transition-all"
+            style={{
+              width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+            }}
+          />
         </div>
 
-        {/* Question */}
-        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-semibold leading-8 text-gray-900">
-            {question.question}
-          </h2>
+        {error && (
+          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
-          <div className="mt-6 space-y-3">
-            {question.options.map((option) => {
-              const isSelected = selectedAnswer === option;
-              const isCorrect = option === question.answer;
+        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-7 shadow-sm">
+          <p className="text-lg font-semibold leading-8">{question.question}</p>
 
-              let className =
-                "w-full rounded-xl border border-gray-200 p-4 text-left transition hover:border-gray-400";
-
-              if (selectedAnswer) {
-                if (isCorrect) {
-                  className =
-                    "w-full rounded-xl border border-green-500 bg-green-50 p-4 text-left";
-                } else if (isSelected) {
-                  className =
-                    "w-full rounded-xl border border-red-500 bg-red-50 p-4 text-left";
-                }
-              }
+          <div className="mt-6 grid gap-3">
+            {getOptions(question).map((option) => {
+              const isSelected = selectedAnswer === option.label;
 
               return (
                 <button
-                  key={option}
-                  onClick={() => handleAnswer(option)}
-                  disabled={Boolean(selectedAnswer)}
-                  className={className}
+                  key={option.label}
+                  type="button"
+                  onClick={() => selectAnswer(question.id, option.label)}
+                  className={`rounded-xl border p-4 text-left transition ${
+                    isSelected
+                      ? "border-black bg-gray-100"
+                      : "border-gray-200 hover:border-gray-400"
+                  }`}
                 >
-                  {option}
+                  <span className="font-semibold">{option.label}.</span>{" "}
+                  {option.value}
                 </button>
               );
             })}
           </div>
 
-          {selectedAnswer && (
+          <div className="mt-8 flex items-center justify-between">
             <button
-              onClick={handleNext}
-              disabled={submitting}
-              className="mt-6 w-full rounded-xl bg-black px-5 py-3 font-semibold text-white transition hover:opacity-80"
+              type="button"
+              onClick={previousQuestion}
+              disabled={currentQuestion === 0 || loading}
+              className="rounded-lg border border-gray-300 px-5 py-2.5 font-medium transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {submitting
-                ? "Saving..."
-                : currentQuestion === questions.length - 1
-                  ? "Finish"
-                  : "Next Question"}
+              Previous
             </button>
-          )}
+
+            {!isLastQuestion ? (
+              <button
+                type="button"
+                onClick={nextQuestion}
+                disabled={!selectedAnswer || loading}
+                className="rounded-lg bg-black px-5 py-2.5 font-medium text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={submitQuiz}
+                disabled={!selectedAnswer || loading}
+                className="rounded-lg bg-black px-5 py-2.5 font-medium text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {loading ? "Submitting..." : "Submit"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

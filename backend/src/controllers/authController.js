@@ -33,7 +33,7 @@ const register = async (req, res) => {
     );
     await pool.query(
       `INSERT INTO user_tokens (user_id, balance)
-   VALUES (?, 0)`,
+   VALUES (?, 5)`,
       [result.insertId],
     );
 
