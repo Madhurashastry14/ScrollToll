@@ -13,7 +13,6 @@ const router = express.Router();
 
 router.post("/unlock", authenticateToken, unlockScroll);
 router.get("/balance", authenticateToken, getScrollBalance);
-router.post("/start", authenticateToken, startScrollSession);
 
 router.post("/end", authenticateToken, endScrollSession);
 

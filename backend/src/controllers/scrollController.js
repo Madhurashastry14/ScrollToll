@@ -127,11 +127,12 @@ const endScrollSession = async (req, res) => {
   }
 };
 const unlockScroll = async (req, res) => {
+  const connection = await pool.getConnection();
+
   try {
     const userId = req.user.userId;
     const { scrollMinutes } = req.body;
 
-    // The backend controls the allowed durations.
     const allowedDurations = [2, 4, 6, 8, 10];
 
     if (!Number.isInteger(scrollMinutes)) {
@@ -146,51 +147,86 @@ const unlockScroll = async (req, res) => {
       });
     }
 
-    // 1 token = 2 minutes
     const tokenCost = scrollMinutes / 2;
 
-    const balance = await getTokenBalance(userId);
+    await connection.beginTransaction();
 
-    if (balance < tokenCost) {
+    const [tokenRows] = await connection.query(
+      `SELECT balance
+       FROM user_tokens
+       WHERE user_id = ?
+       FOR UPDATE`,
+      [userId],
+    );
+
+    if (tokenRows.length === 0) {
+      await connection.rollback();
+
+      return res.status(404).json({
+        message: "Token account not found",
+      });
+    }
+
+    const currentBalance = Number(tokenRows[0].balance);
+
+    if (currentBalance < tokenCost) {
+      await connection.rollback();
+
       return res.status(403).json({
         message: "Not enough Scroll Tokens",
-        balance,
+        balance: currentBalance,
         required: tokenCost,
       });
     }
 
-    const newBalance = await spendTokens(userId, tokenCost);
+    const newBalance = currentBalance - tokenCost;
 
-    const tollLevel = 1;
+    await connection.query(
+      `UPDATE user_tokens
+       SET balance = ?
+       WHERE user_id = ?`,
+      [newBalance, userId],
+    );
 
-    const [result] = await pool.query(
+    const [unlockResult] = await connection.query(
       `INSERT INTO unlock_events
        (user_id, method, toll_level, scroll_minutes)
        VALUES (?, 'scroll_tokens', ?, ?)`,
-      [userId, tollLevel, scrollMinutes],
+      [userId, 1, scrollMinutes],
     );
 
-    res.status(201).json({
+    const [sessionResult] = await connection.query(
+      `INSERT INTO scroll_sessions
+       (user_id, started_at, duration_seconds, intentionality)
+       VALUES (?, NOW(), 0, 'unknown')`,
+      [userId],
+    );
+
+    await connection.commit();
+
+    return res.status(201).json({
       message: "Scroll unlocked",
-
       unlock: {
-        id: result.insertId,
+        id: unlockResult.insertId,
         scrollMinutes,
-        tollLevel,
+        tollLevel: 1,
       },
-
+      sessionId: sessionResult.insertId,
       tokenCost,
       balance: newBalance,
     });
   } catch (error) {
+    await connection.rollback();
+
     console.error("Scroll unlock error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Internal server error",
     });
+  } finally {
+    connection.release();
   }
 };
-
 module.exports = {
   unlockScroll,
   getScrollBalance,
