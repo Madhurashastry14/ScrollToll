@@ -123,12 +123,12 @@ function Dashboard() {
 
               <Link
                 to="/mindful-minute"
-                className="rounded-xl border border-gray-200 p-4 text-left transition hover:border-gray-400 hover:shadow-sm"
+                className="rounded-xl border border-gray-200 p-5 transition hover:border-gray-400"
               >
-                <p className="font-semibold text-gray-900">Mindful Minute</p>
+                <p className="font-semibold">Mindful Minute</p>
 
-                <p className="mt-1 text-sm text-gray-500">
-                  Take a mindful break
+                <p className="mt-2 text-sm text-gray-500">
+                  Take a one-minute intentional pause and earn 1 Scroll Token.
                 </p>
               </Link>
             </div>
