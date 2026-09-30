@@ -1,6 +1,5 @@
-import { createContext, useContext, useState } from "react";
-
-const AuthContext = createContext(null);
+import { useState } from "react";
+import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -8,14 +7,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData, jwtToken) => {
     localStorage.setItem("token", jwtToken);
-
     setToken(jwtToken);
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-
     setToken(null);
     setUser(null);
   };
@@ -33,8 +30,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  return useContext(AuthContext);
 };
