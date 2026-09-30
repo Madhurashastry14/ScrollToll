@@ -36,6 +36,7 @@ function App() {
           <Route path="/mindful-minute" element={<MindfulMinute />} />
           <Route path="/scroll-feed" element={<ScrollFeed />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/mindful-minute" element={<MindfulMinute />} />
         </Route>
       </Routes>
     </BrowserRouter>
