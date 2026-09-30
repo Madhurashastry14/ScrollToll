@@ -1,27 +1,32 @@
-import { useEffect, useState } from "react";
-import { apiRequest } from "./services/api";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const [message, setMessage] = useState("Connecting...");
-
-  useEffect(() => {
-    const checkBackend = async () => {
-      try {
-        const data = await apiRequest("/health");
-        setMessage(`${data.status} - ${data.database}`);
-      } catch (error) {
-        setMessage(`Connection failed: ${error.message}`);
-      }
-    };
-
-    checkBackend();
-  }, []);
-
   return (
-    <div>
-      <h1>ScrollToll</h1>
-      <p>Backend status: {message}</p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/register" element={<Register />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
