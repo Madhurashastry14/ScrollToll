@@ -299,7 +299,7 @@ const completeMindfulMinute = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    const { durationSeconds } = req.body;
+    const { durationSeconds, reflection } = req.body;
 
     if (!Number.isInteger(durationSeconds)) {
       return res.status(400).json({
@@ -313,6 +313,27 @@ const completeMindfulMinute = async (req, res) => {
       });
     }
 
+    if (typeof reflection !== "string" || reflection.trim().length === 0) {
+      return res.status(400).json({
+        message: "Reflection is required",
+      });
+    }
+
+    const trimmedReflection = reflection.trim();
+
+    if (trimmedReflection.length > 1000) {
+      return res.status(400).json({
+        message: "Reflection must be 1000 characters or less",
+      });
+    }
+
+    await pool.query(
+      `INSERT INTO reflections
+       (user_id, content)
+       VALUES (?, ?)`,
+      [userId, trimmedReflection],
+    );
+
     const tokensEarned = 1;
 
     const newBalance = await addTokens(userId, tokensEarned);
@@ -320,6 +341,7 @@ const completeMindfulMinute = async (req, res) => {
     res.status(201).json({
       message: "Mindful Minute completed",
       durationSeconds,
+      reflection: trimmedReflection,
       tokensEarned,
       balance: newBalance,
     });
@@ -331,7 +353,6 @@ const completeMindfulMinute = async (req, res) => {
     });
   }
 };
-
 module.exports = {
   startBrainGym,
   submitBrainGym,
