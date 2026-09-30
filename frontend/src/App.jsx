@@ -8,6 +8,7 @@ import BrainGym from "./pages/BrainGym";
 import FocusForge from "./pages/FocusForge";
 import MindfulMinute from "./pages/MindfulMinute";
 import ScrollFeed from "./pages/ScrollFeed";
+import Analytics from "./pages/Analytics";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -34,6 +35,7 @@ function App() {
           <Route path="/focus-forge" element={<FocusForge />} />
           <Route path="/mindful-minute" element={<MindfulMinute />} />
           <Route path="/scroll-feed" element={<ScrollFeed />} />
+          <Route path="/analytics" element={<Analytics />} />
         </Route>
       </Routes>
     </BrowserRouter>

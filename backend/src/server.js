@@ -9,6 +9,7 @@ const activityRoutes = require("./routes/activityRoutes");
 const scrollRoutes = require("./routes/scrollRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const videoRoutes = require("./routes/videoRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 const app = express();
 
 app.use(cors());
@@ -20,6 +21,7 @@ app.use("/api/activities", activityRoutes);
 app.use("/api/scroll", scrollRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/videos", videoRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.get("/", (req, res) => {
   res.json({
     message: "ScrollToll backend is running",
