@@ -15,4 +15,5 @@ router.post("/brain-gym/start", authenticateToken, startBrainGym);
 router.post("/brain-gym/submit", authenticateToken, submitBrainGym);
 router.post("/focus-forge", authenticateToken, completeFocusForge);
 router.post("/mindful-minute", authenticateToken, completeMindfulMinute);
+
 module.exports = router;

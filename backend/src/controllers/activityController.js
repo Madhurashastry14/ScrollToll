@@ -69,7 +69,6 @@ const startBrainGym = async (req, res) => {
 const submitBrainGym = async (req, res) => {
   try {
     const userId = req.user.userId;
-
     const { attemptId, answers } = req.body;
 
     if (!Number.isInteger(attemptId) || !Array.isArray(answers)) {
@@ -100,7 +99,16 @@ const submitBrainGym = async (req, res) => {
       });
     }
 
-    const questionIds = JSON.parse(attempt.question_ids);
+    const questionIds =
+      typeof attempt.question_ids === "string"
+        ? JSON.parse(attempt.question_ids)
+        : attempt.question_ids;
+
+    if (!Array.isArray(questionIds) || questionIds.length !== 3) {
+      return res.status(400).json({
+        message: "Invalid Brain Gym question set",
+      });
+    }
 
     if (answers.length !== questionIds.length) {
       return res.status(400).json({
@@ -108,12 +116,59 @@ const submitBrainGym = async (req, res) => {
       });
     }
 
+    const validAnswers = ["A", "B", "C", "D"];
+
+    const submittedQuestionIds = answers.map((answer) => answer.questionId);
+
+    const uniqueQuestionIds = new Set(submittedQuestionIds);
+
+    if (uniqueQuestionIds.size !== questionIds.length) {
+      return res.status(400).json({
+        message: "Each Brain Gym question can only be answered once",
+      });
+    }
+
+    const allQuestionsBelongToAttempt = submittedQuestionIds.every(
+      (questionId) => questionIds.includes(questionId),
+    );
+
+    if (!allQuestionsBelongToAttempt) {
+      return res.status(400).json({
+        message: "Invalid Brain Gym question submitted",
+      });
+    }
+
+    const allAnswersValid = answers.every((answer) =>
+      validAnswers.includes(answer.answer),
+    );
+
+    if (!allAnswersValid) {
+      return res.status(400).json({
+        message: "Invalid answer submitted",
+      });
+    }
+
     const [questions] = await pool.query(
-      `SELECT id, correct_answer
+      `SELECT
+        id,
+        question,
+        option_a,
+        option_b,
+        option_c,
+        option_d,
+        correct_answer,
+        explanation,
+        difficulty
        FROM brain_gym_questions
        WHERE id IN (?)`,
       [questionIds],
     );
+
+    if (questions.length !== questionIds.length) {
+      return res.status(500).json({
+        message: "Some Brain Gym questions could not be found",
+      });
+    }
 
     const answerMap = new Map(
       answers.map((answer) => [answer.questionId, answer.answer]),
@@ -121,13 +176,32 @@ const submitBrainGym = async (req, res) => {
 
     let correctAnswers = 0;
 
-    for (const question of questions) {
-      const userAnswer = answerMap.get(question.id);
+    const questionResults = questionIds.map((questionId) => {
+      const question = questions.find((item) => item.id === questionId);
 
-      if (userAnswer === question.correct_answer) {
+      const userAnswer = answerMap.get(questionId);
+      const isCorrect = userAnswer === question.correct_answer;
+
+      if (isCorrect) {
         correctAnswers++;
       }
-    }
+
+      return {
+        questionId: question.id,
+        question: question.question,
+        options: {
+          A: question.option_a,
+          B: question.option_b,
+          C: question.option_c,
+          D: question.option_d,
+        },
+        userAnswer,
+        correctAnswer: question.correct_answer,
+        isCorrect,
+        explanation: question.explanation,
+        difficulty: question.difficulty,
+      };
+    });
 
     const questionsAnswered = questionIds.length;
 
@@ -160,6 +234,7 @@ const submitBrainGym = async (req, res) => {
         correctAnswers,
         tokensEarned,
         balance: newBalance,
+        questions: questionResults,
       },
     });
   } catch (error) {
@@ -258,7 +333,8 @@ const completeMindfulMinute = async (req, res) => {
 };
 
 module.exports = {
-  completeBrainGym,
+  startBrainGym,
+  submitBrainGym,
   completeFocusForge,
   completeMindfulMinute,
 };

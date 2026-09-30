@@ -4,12 +4,14 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-
-import ProtectedRoute from "./components/ProtectedRoute";
-import DashboardLayout from "./layouts/DashboardLayout";
 import BrainGym from "./pages/BrainGym";
 import FocusForge from "./pages/FocusForge";
 import MindfulMinute from "./pages/MindfulMinute";
+import ScrollFeed from "./pages/ScrollFeed";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import DashboardLayout from "./layouts/DashboardLayout";
+
 function App() {
   return (
     <BrowserRouter>
@@ -31,6 +33,7 @@ function App() {
           <Route path="/brain-gym" element={<BrainGym />} />
           <Route path="/focus-forge" element={<FocusForge />} />
           <Route path="/mindful-minute" element={<MindfulMinute />} />
+          <Route path="/scroll-feed" element={<ScrollFeed />} />
         </Route>
       </Routes>
     </BrowserRouter>

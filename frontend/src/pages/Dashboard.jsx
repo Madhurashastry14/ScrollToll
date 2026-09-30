@@ -1,8 +1,36 @@
+import { useEffect, useState } from "react";
 import StatCard from "../components/StatCard";
 import { useAuth } from "../context/useAuth";
 import { Link } from "react-router-dom";
+import { apiRequest } from "../services/api";
+
 function Dashboard() {
   const { user } = useAuth();
+
+  const [stats, setStats] = useState({
+    focusTimeMinutes: null,
+    scrollTimeMinutes: null,
+    tokenBalance: null,
+  });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadDashboardStats = async () => {
+      try {
+        const data = await apiRequest("/dashboard/stats");
+
+        setStats({
+          focusTimeMinutes: data.focusTimeMinutes,
+          scrollTimeMinutes: data.scrollTimeMinutes,
+          tokenBalance: data.tokenBalance,
+        });
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    loadDashboardStats();
+  }, []);
 
   return (
     <div className="min-h-screen px-6 py-8">
@@ -20,23 +48,38 @@ function Dashboard() {
           </p>
         </section>
 
+        {/* Error */}
+        {error && (
+          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         {/* Stats */}
         <section className="mt-8 grid gap-5 md:grid-cols-3">
           <StatCard
             title="Focus Time"
-            value="0 min"
+            value={
+              stats.focusTimeMinutes !== null
+                ? `${stats.focusTimeMinutes} min`
+                : "—"
+            }
             description="Time spent productively"
           />
 
           <StatCard
             title="Scroll Time"
-            value="0 min"
+            value={
+              stats.scrollTimeMinutes !== null
+                ? `${stats.scrollTimeMinutes} min`
+                : "—"
+            }
             description="Time spent scrolling"
           />
 
           <StatCard
             title="Scroll Tokens"
-            value="0"
+            value={stats.tokenBalance ?? "—"}
             description="Available for intentional scrolling"
           />
         </section>
@@ -103,9 +146,12 @@ function Dashboard() {
               Use your earned tokens to access a controlled short-video session.
             </p>
 
-            <button className="mt-6 rounded-xl bg-white px-5 py-3 font-semibold text-black transition hover:bg-gray-200">
+            <Link
+              to="/scroll-feed"
+              className="mt-6 inline-block rounded-xl bg-white px-5 py-3 font-semibold text-black transition hover:bg-gray-200"
+            >
               Start Scrolling
-            </button>
+            </Link>
           </div>
         </section>
 

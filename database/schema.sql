@@ -133,9 +133,7 @@ CREATE TABLE unlock_events (
     user_id INT NOT NULL,
 
     method ENUM(
-        'brain_gym',
-        'focus_forge',
-        'mindful_minute'
+    'scroll_tokens'
     ) NOT NULL,
 
     toll_level INT NOT NULL DEFAULT 1,
