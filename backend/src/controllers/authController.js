@@ -31,6 +31,11 @@ const register = async (req, res) => {
        VALUES (?, ?, ?)`,
       [name, email, passwordHash],
     );
+    await pool.query(
+      `INSERT INTO user_tokens (user_id, balance)
+   VALUES (?, 0)`,
+      [result.insertId],
+    );
 
     res.status(201).json({
       message: "Registration successful",

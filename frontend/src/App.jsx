@@ -6,7 +6,10 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import DashboardLayout from "./layouts/DashboardLayout";
+import BrainGym from "./pages/BrainGym";
+import FocusForge from "./pages/FocusForge";
+import MindfulMinute from "./pages/MindfulMinute";
 function App() {
   return (
     <BrowserRouter>
@@ -18,13 +21,17 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         <Route
-          path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/brain-gym" element={<BrainGym />} />
+          <Route path="/focus-forge" element={<FocusForge />} />
+          <Route path="/mindful-minute" element={<MindfulMinute />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
