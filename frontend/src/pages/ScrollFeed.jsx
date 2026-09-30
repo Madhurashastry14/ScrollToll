@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
@@ -33,7 +33,29 @@ function ScrollFeed() {
   const [unlocking, setUnlocking] = useState(false);
   const [error, setError] = useState("");
   const [sessionId, setSessionId] = useState(null);
-
+  const endSession = useCallback(
+    async (reason = "timer_expired") => {
+      try {
+        if (sessionId) {
+          await apiRequest("/scroll/end", {
+            method: "POST",
+            body: JSON.stringify({
+              sessionId,
+              intentionality: "intentional",
+              reason,
+            }),
+          });
+        }
+      } catch (err) {
+        console.error("Failed to end scroll session:", err);
+      } finally {
+        setSessionStarted(false);
+        setRemainingSeconds(0);
+        setSessionId(null);
+      }
+    },
+    [sessionId],
+  );
   useEffect(() => {
     if (!sessionStarted) {
       return;
@@ -43,7 +65,7 @@ function ScrollFeed() {
       setRemainingSeconds((previous) => {
         if (previous <= 1) {
           clearInterval(timer);
-          setSessionStarted(false);
+          endSession("timer_expired");
           return 0;
         }
 
@@ -52,7 +74,7 @@ function ScrollFeed() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [sessionStarted]);
+  }, [sessionStarted, endSession]);
 
   useEffect(() => {
     if (!sessionStarted) {
@@ -72,7 +94,7 @@ function ScrollFeed() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [sessionStarted]);
+  }, [sessionStarted, endSession]);
 
   const unlockScroll = async () => {
     try {
@@ -99,27 +121,6 @@ function ScrollFeed() {
       setError(err.message);
     } finally {
       setUnlocking(false);
-    }
-  };
-
-  const endSession = async (reason = "timer_expired") => {
-    try {
-      if (sessionId) {
-        await apiRequest("/scroll/end", {
-          method: "POST",
-          body: JSON.stringify({
-            sessionId,
-            intentionality: "intentional",
-            reason,
-          }),
-        });
-      }
-    } catch (err) {
-      console.error("Failed to end scroll session:", err);
-    } finally {
-      setSessionStarted(false);
-      setRemainingSeconds(0);
-      setSessionId(null);
     }
   };
 
