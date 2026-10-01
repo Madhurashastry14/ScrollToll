@@ -189,107 +189,128 @@ function ScrollFeed() {
     )}`;
   };
 
+  const optionBase =
+    "rounded-lg border p-3.5 text-left transition active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-700 sm:p-4";
+  const optionSelected = "border-zinc-700 bg-zinc-50/60 ring-1 ring-zinc-700";
+  const optionIdle =
+    "border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50";
+
   if (!sessionStarted) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-12">
-        <Link
-          to="/dashboard"
-          className="text-sm text-gray-500 hover:text-gray-900"
-        >
-          ← Back to Dashboard
-        </Link>
-
-        <div className="mt-10">
-          <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
-            Controlled Feed
-          </p>
-
-          <h1 className="mt-2 text-4xl font-bold tracking-tight">
-            Choose your scroll time
-          </h1>
-
-          <p className="mt-4 text-gray-600">
-            1 Scroll Token gives you 2 minutes of scrolling.
-          </p>
-        </div>
-
-        {error && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-7 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">Available tokens</p>
-
-          <p className="mt-2 text-4xl font-bold">{balance ?? "—"}</p>
-
-          <div className="mt-8">
-            <p className="text-sm font-medium">Select duration</p>
-
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-              {scrollOptions.map((minutes) => {
-                const cost = minutes / 2;
-                const selected = selectedMinutes === minutes;
-
-                return (
-                  <button
-                    key={minutes}
-                    type="button"
-                    onClick={() => setSelectedMinutes(minutes)}
-                    className={`rounded-xl border p-4 transition ${
-                      selected
-                        ? "border-black bg-gray-100"
-                        : "border-gray-200 hover:border-gray-400"
-                    }`}
-                  >
-                    <p className="font-semibold">{minutes} min</p>
-
-                    <p className="mt-1 text-sm text-gray-500">
-                      {cost} token{cost !== 1 ? "s" : ""}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <p className="text-sm font-medium">Why are you scrolling?</p>
-
-            <div className="mt-4 space-y-3">
-              {scrollReasons.map((reason) => {
-                const selected = scrollReason === reason.value;
-
-                return (
-                  <button
-                    key={reason.value}
-                    type="button"
-                    onClick={() => {
-                      setScrollReason(reason.value);
-                      setError("");
-                    }}
-                    className={`w-full rounded-xl border p-4 text-left transition ${
-                      selected
-                        ? "border-black bg-gray-100"
-                        : "border-gray-200 hover:border-gray-400"
-                    }`}
-                  >
-                    <p className="font-medium">{reason.label}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={unlockScroll}
-            disabled={unlocking}
-            className="mt-8 w-full rounded-xl bg-black px-5 py-3 font-medium text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+      <div className="min-h-screen bg-[#f6f6f3] px-4 py-8 text-zinc-900 sm:px-6 sm:py-12">
+        <div className="st-enter mx-auto max-w-2xl">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-1.5 rounded-md text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-700"
           >
-            {unlocking ? "Unlocking..." : `Unlock ${selectedMinutes} minutes`}
-          </button>
+            <span aria-hidden="true">←</span> Back to Dashboard
+          </Link>
+
+          <div className="mt-6">
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Choose your scroll time
+            </h1>
+
+            <p className="mt-2 text-sm leading-relaxed text-zinc-600 sm:text-base">
+              1 Scroll Token gives you 2 minutes of scrolling.
+            </p>
+          </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            >
+              {error}
+            </div>
+          )}
+
+          <div className="mt-5 rounded-xl border border-zinc-200 bg-white p-5 sm:p-7">
+            <div className="flex items-baseline justify-between gap-4 border-b border-zinc-100 pb-5">
+              <p className="text-sm text-zinc-500">Available tokens</p>
+
+              <p className="text-3xl font-semibold tracking-tight tabular-nums text-zinc-900">
+                {balance ?? "—"}
+              </p>
+            </div>
+
+            <div className="mt-6">
+              <p className="text-sm font-semibold text-zinc-900">
+                Select duration
+              </p>
+
+              <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-5 sm:gap-3">
+                {scrollOptions.map((minutes) => {
+                  const cost = minutes / 2;
+                  const selected = selectedMinutes === minutes;
+
+                  return (
+                    <button
+                      key={minutes}
+                      type="button"
+                      onClick={() => setSelectedMinutes(minutes)}
+                      aria-pressed={selected}
+                      className={`${optionBase} ${
+                        selected ? optionSelected : optionIdle
+                      }`}
+                    >
+                      <p className="font-semibold text-zinc-900">
+                        {minutes} min
+                      </p>
+
+                      <p className="mt-0.5 text-xs text-zinc-500">
+                        {cost} token{cost !== 1 ? "s" : ""}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <p className="text-sm font-semibold text-zinc-900">
+                Why are you scrolling?
+              </p>
+
+              <div className="mt-3 space-y-2">
+                {scrollReasons.map((reason) => {
+                  const selected = scrollReason === reason.value;
+
+                  return (
+                    <button
+                      key={reason.value}
+                      type="button"
+                      onClick={() => {
+                        setScrollReason(reason.value);
+                        setError("");
+                      }}
+                      aria-pressed={selected}
+                      className={`${optionBase} w-full ${
+                        selected ? optionSelected : optionIdle
+                      }`}
+                    >
+                      <p
+                        className={`text-sm text-zinc-900 ${
+                          selected ? "font-medium" : ""
+                        }`}
+                      >
+                        {reason.label}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={unlockScroll}
+              disabled={unlocking}
+              className="mt-7 inline-flex w-full items-center justify-center rounded-lg bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-900 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {unlocking ? "Unlocking..." : `Unlock ${selectedMinutes} minutes`}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -299,15 +320,23 @@ function ScrollFeed() {
     <div className="min-h-screen bg-black text-white">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-black/90 px-6 py-4 backdrop-blur">
         <div>
-          <p className="text-sm text-gray-400">ScrollToll</p>
+          <p className="text-xs text-zinc-400">ScrollToll</p>
 
-          <p className="font-semibold">{formatTime(remainingSeconds)}</p>
+          <p
+            className={`font-mono text-sm font-semibold tabular-nums tracking-wider transition-colors ${
+              remainingSeconds <= 30 ? "text-amber-400" : "text-white"
+            }`}
+            role="timer"
+            aria-live="off"
+          >
+            {formatTime(remainingSeconds)}
+          </p>
         </div>
 
         <button
           type="button"
           onClick={exitSession}
-          className="rounded-lg border border-white/20 px-4 py-2 text-sm transition hover:bg-white/10"
+          className="rounded-lg border border-white/20 px-4 py-2 text-xs font-medium transition hover:bg-white/10 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           Exit
         </button>
@@ -315,22 +344,29 @@ function ScrollFeed() {
 
       <main className="h-[calc(100vh-73px)] snap-y snap-mandatory overflow-y-auto">
         {videosLoading && (
-          <div className="flex h-full items-center justify-center">
-            <p className="text-gray-400">Loading videos...</p>
+          <div
+            className="flex h-full items-center justify-center gap-2.5"
+            role="status"
+          >
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white motion-reduce:animate-none" />
+            <p className="text-sm text-zinc-400">Loading videos...</p>
           </div>
         )}
 
         {videoError && (
           <div className="flex h-full items-center justify-center px-6">
-            <div className="rounded-2xl bg-red-950 p-6 text-center">
-              <p className="text-red-300">{videoError}</p>
+            <div
+              role="alert"
+              className="rounded-lg border border-rose-900/50 bg-rose-950/40 p-5 text-center"
+            >
+              <p className="text-sm text-rose-300">{videoError}</p>
             </div>
           </div>
         )}
 
         {!videosLoading && !videoError && videos.length === 0 && (
           <div className="flex h-full items-center justify-center">
-            <p className="text-gray-400">No videos found.</p>
+            <p className="text-sm text-zinc-400">No videos found.</p>
           </div>
         )}
 
@@ -339,28 +375,28 @@ function ScrollFeed() {
           videos.map((video) => (
             <article
               key={video.videoId}
-              className="relative h-[calc(100vh-73px)] snap-start"
+              className="relative h-[calc(100vh-73px)] snap-start bg-black"
             >
               <div className="absolute inset-0">
                 <iframe
                   src={`${video.embedUrl}?rel=0`}
                   title={video.title}
-                  className="h-full w-full"
+                  className="h-full w-full border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                 />
               </div>
 
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent p-6 pt-24">
-                <h2 className="max-w-lg text-lg font-semibold">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-5 pt-24 sm:p-6">
+                <h2 className="max-w-lg text-base font-semibold leading-snug sm:text-lg">
                   {video.title}
                 </h2>
 
-                <p className="mt-2 max-w-lg text-sm text-gray-300">
+                <p className="mt-1.5 line-clamp-2 max-w-lg text-xs text-zinc-300 sm:text-sm">
                   {video.description}
                 </p>
 
-                <p className="mt-3 text-xs text-gray-400">
+                <p className="mt-2.5 text-xs font-medium text-zinc-400">
                   {video.channelTitle}
                 </p>
               </div>

@@ -46,21 +46,23 @@ function FocusGame() {
 
   if (!game) {
     return (
-      <div className="min-h-screen px-6 py-12">
-        <div className="mx-auto max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
+      <div className="min-h-screen bg-[#faf9f6] px-6 py-12 text-gray-900">
+        <div className="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
             Focus Forge
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold">Game not found</h1>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900">
+            Game not found
+          </h1>
 
-          <p className="mt-3 text-gray-600">
+          <p className="mt-2 text-sm text-gray-600 leading-relaxed">
             The selected Focus Forge game does not exist.
           </p>
 
           <Link
             to="/focus-forge"
-            className="mt-6 inline-block rounded-xl bg-black px-5 py-3 text-sm font-semibold text-white"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-gray-900 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-gray-800"
           >
             Back to Focus Forge
           </Link>
@@ -120,29 +122,37 @@ function FocusGame() {
 
   if (reward) {
     return (
-      <div className="min-h-screen px-6 py-12">
-        <div className="mx-auto max-w-2xl">
+      <div className="min-h-screen bg-[#faf9f6] px-6 py-12 text-gray-900">
+        <div className="mx-auto max-w-xl">
           <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
               Focus Forge Complete
             </p>
 
-            <h1 className="mt-3 text-3xl font-bold">{game.title}</h1>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+              {game.title}
+            </h1>
 
-            <div className="mt-8 rounded-2xl bg-gray-50 p-6">
-              <p className="text-sm text-gray-500">Rounds completed</p>
+            <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 p-5">
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                Rounds completed
+              </p>
 
-              <p className="mt-2 text-4xl font-bold">
+              <p className="mt-1 text-3xl font-bold tracking-tight text-gray-900">
                 {reward.session.roundsCompleted}/3
               </p>
             </div>
 
             <div className="mt-6">
-              <p className="text-sm text-gray-500">Tokens earned</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                Tokens earned
+              </p>
 
-              <p className="mt-1 text-5xl font-bold">+{reward.tokensEarned}</p>
+              <p className="mt-1 text-4xl font-bold tracking-tight text-gray-900">
+                +{reward.tokensEarned}
+              </p>
 
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-xs text-gray-500">
                 Current balance: {reward.balance}
               </p>
             </div>
@@ -151,7 +161,7 @@ function FocusGame() {
               <button
                 type="button"
                 onClick={() => navigate(`/focus-forge/${gameId}`)}
-                className="flex-1 rounded-xl bg-black px-5 py-3 font-semibold text-white transition hover:opacity-80"
+                className="flex-1 inline-flex items-center justify-center rounded-xl bg-gray-900 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-gray-800"
               >
                 Play Again
               </button>
@@ -159,7 +169,7 @@ function FocusGame() {
               <button
                 type="button"
                 onClick={() => navigate("/focus-forge")}
-                className="flex-1 rounded-xl border border-gray-300 px-5 py-3 font-semibold transition hover:bg-gray-50"
+                className="flex-1 inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-xs transition hover:bg-gray-50"
               >
                 Choose Another Game
               </button>
@@ -171,52 +181,58 @@ function FocusGame() {
   }
 
   return (
-    <div className="min-h-screen px-6 py-12">
-      <div className="mx-auto max-w-3xl">
+    <div className="min-h-screen bg-[#faf9f6] px-6 py-12 text-gray-900">
+      <div className="mx-auto max-w-2xl">
         <Link
           to="/focus-forge"
-          className="text-sm text-gray-500 transition hover:text-gray-900"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-900"
         >
-          ← Back to Focus Forge
+          <span aria-hidden="true">←</span> Back to Focus Forge
         </Link>
 
         <div className="mt-8 text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
             Focus Forge
           </p>
 
-          <h1 className="mt-2 text-4xl font-bold tracking-tight">
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             {game.title}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-xl text-gray-600">
+          <p className="mx-auto mt-2 max-w-md text-sm text-gray-600 leading-relaxed">
             {game.description}
           </p>
         </div>
 
-        <div className="mt-8 flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-4">
+        <div className="mt-8 flex items-center justify-between rounded-xl border border-gray-200 bg-white px-6 py-4 shadow-xs">
           <div>
-            <p className="text-sm text-gray-500">Round</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+              Round
+            </p>
 
-            <p className="text-xl font-bold">
+            <p className="mt-1 text-lg font-bold text-gray-900">
               {currentRound} / {TOTAL_ROUNDS}
             </p>
           </div>
 
           <div className="text-right">
-            <p className="text-sm text-gray-500">Completed</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+              Completed
+            </p>
 
-            <p className="text-xl font-bold">{roundsCompleted}</p>
+            <p className="mt-1 text-lg font-bold text-gray-900">
+              {roundsCompleted}
+            </p>
           </div>
         </div>
 
         {error && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm">
             {error}
           </div>
         )}
 
-        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
           {gameId === "target_focus" && (
             <TargetFocus
               key={`${gameId}-${currentRound}`}
@@ -263,8 +279,8 @@ function FocusGame() {
           )}
 
           {roundFinished && (
-            <div className="mt-8 border-t border-gray-200 pt-6 text-center">
-              <p className="text-lg font-semibold">
+            <div className="mt-8 border-t border-gray-100 pt-6 text-center">
+              <p className="text-base font-semibold text-gray-900">
                 Round {currentRound} complete
               </p>
 
@@ -272,7 +288,7 @@ function FocusGame() {
                 type="button"
                 onClick={handleNextRound}
                 disabled={submitting}
-                className="mt-5 rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:opacity-80 disabled:opacity-50"
+                className="mt-4 inline-flex items-center justify-center rounded-xl bg-gray-900 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:opacity-50"
               >
                 {currentRound === TOTAL_ROUNDS ? "Finish Game" : "Next Round"}
               </button>
@@ -374,24 +390,26 @@ function TargetFocus({ round, disabled, onComplete }) {
   return (
     <div>
       <div className="text-center">
-        <p className="text-sm font-medium uppercase tracking-widest text-gray-400">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
           Visual Recall
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold">Find the Targets</h2>
+        <h2 className="mt-2 text-xl font-bold tracking-tight text-gray-900">
+          Find the Targets
+        </h2>
 
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+        <p className="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500">
           Memorize where the targets appear, then find them after they
           disappear.
         </p>
       </div>
 
-      <div className="mt-8 text-center">
+      <div className="mt-6 text-center">
         {phase === "ready" && (
           <>
-            <p className="text-lg font-semibold">Ready?</p>
+            <p className="text-base font-semibold text-gray-900">Ready?</p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-xs text-gray-500">
               You will have a few seconds to memorize the target positions.
             </p>
 
@@ -399,7 +417,7 @@ function TargetFocus({ round, disabled, onComplete }) {
               type="button"
               onClick={startGame}
               disabled={disabled}
-              className="mt-5 rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:scale-[1.02] hover:opacity-90 disabled:cursor-default disabled:opacity-50"
+              className="mt-4 inline-flex items-center justify-center rounded-xl bg-gray-900 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 disabled:opacity-50"
             >
               Start Round
             </button>
@@ -408,9 +426,9 @@ function TargetFocus({ round, disabled, onComplete }) {
 
         {phase === "memorize" && (
           <>
-            <p className="text-lg font-semibold">Memorize</p>
+            <p className="text-base font-semibold text-gray-900">Memorize</p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-xs text-gray-500">
               Remember the highlighted cells.
             </p>
           </>
@@ -418,9 +436,9 @@ function TargetFocus({ round, disabled, onComplete }) {
 
         {phase === "recall" && (
           <>
-            <p className="text-lg font-semibold">Your turn</p>
+            <p className="text-base font-semibold text-gray-900">Your turn</p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-xs text-gray-500">
               Find all {targetCount} targets.
             </p>
           </>
@@ -428,9 +446,11 @@ function TargetFocus({ round, disabled, onComplete }) {
 
         {phase === "success" && (
           <>
-            <p className="text-lg font-semibold text-green-700">✓ Excellent</p>
+            <p className="text-base font-semibold text-emerald-700">
+              ✓ Excellent
+            </p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-xs text-gray-500">
               You found every target.
             </p>
           </>
@@ -438,17 +458,17 @@ function TargetFocus({ round, disabled, onComplete }) {
 
         {phase === "failed" && (
           <>
-            <p className="text-lg font-semibold text-red-700">✕ Missed</p>
+            <p className="text-base font-semibold text-rose-700">✕ Missed</p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-xs text-gray-500">
               That wasn't one of the target cells.
             </p>
           </>
         )}
       </div>
 
-      <div className="mx-auto mt-6 max-w-md">
-        <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="mx-auto mt-6 max-w-xs">
+        <div className="flex items-center justify-between text-xs font-medium text-gray-500">
           <span>Targets found</span>
 
           <span>
@@ -456,9 +476,9 @@ function TargetFocus({ round, disabled, onComplete }) {
           </span>
         </div>
 
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-100">
           <div
-            className="h-full rounded-full bg-black transition-all duration-300"
+            className="h-full rounded-full bg-gray-900 transition-all duration-300"
             style={{
               width: `${progress}%`,
             }}
@@ -467,7 +487,7 @@ function TargetFocus({ round, disabled, onComplete }) {
       </div>
 
       <div
-        className="mx-auto mt-8 grid max-w-md gap-2"
+        className="mx-auto mt-6 grid max-w-xs gap-2"
         style={{
           gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
         }}
@@ -488,27 +508,22 @@ function TargetFocus({ round, disabled, onComplete }) {
               disabled={disabled || phase !== "recall" || isSelected}
               onClick={() => handleClick(index)}
               className={`
-                  aspect-square rounded-xl border
-                  text-2xl font-semibold
-                  transition-all duration-200
+                  aspect-square rounded-xl border text-lg font-semibold
+                  transition-all duration-200 flex items-center justify-center
                   ${
                     showTarget
-                      ? "scale-105 border-black bg-black text-white shadow-lg"
+                      ? "border-gray-900 bg-gray-900 text-white shadow-xs"
                       : ""
                   }
-                  ${
-                    isSelected
-                      ? "scale-95 border-black bg-gray-900 text-white"
-                      : ""
-                  }
+                  ${isSelected ? "border-gray-900 bg-gray-800 text-white" : ""}
                   ${
                     isWrong
-                      ? "animate-pulse border-red-500 bg-red-100 text-red-600"
+                      ? "border-rose-500 bg-rose-50 text-rose-600 animate-pulse"
                       : ""
                   }
                   ${
                     !showTarget && !isSelected && !isWrong
-                      ? "border-gray-200 bg-gray-50 hover:scale-[1.02] hover:border-gray-400 hover:bg-white"
+                      ? "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white"
                       : ""
                   }
                   ${phase === "recall" ? "cursor-pointer" : "cursor-default"}
@@ -567,13 +582,17 @@ function OddOneOut({ round, disabled, onComplete }) {
   return (
     <div>
       <div className="text-center">
-        <p className="text-sm text-gray-500">Find the odd one</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+          Find the odd one
+        </p>
 
-        <p className="mt-1 font-semibold">🔎 Tap the item that is different</p>
+        <p className="mt-1 text-base font-semibold text-gray-900">
+          🔎 Tap the item that is different
+        </p>
       </div>
 
       <div
-        className="mx-auto mt-8 grid max-w-md gap-2"
+        className="mx-auto mt-6 grid max-w-xs gap-2"
         style={{
           gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
         }}
@@ -584,7 +603,7 @@ function OddOneOut({ round, disabled, onComplete }) {
             type="button"
             disabled={disabled}
             onClick={() => handleClick(index)}
-            className="aspect-square rounded-xl border border-gray-200 bg-gray-50 text-3xl transition hover:bg-gray-100 disabled:cursor-default"
+            className="aspect-square rounded-xl border border-gray-200 bg-gray-50 text-xl transition hover:bg-gray-100 hover:border-gray-300 disabled:cursor-default"
           >
             {index === oddCell ? "○" : "●"}
           </button>
@@ -658,33 +677,35 @@ function ColorChallenge({ round, disabled, onComplete }) {
   return (
     <div>
       <div className="text-center">
-        <p className="text-sm font-medium uppercase tracking-widest text-gray-400">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
           Attention Control
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold">Color Challenge</h2>
+        <h2 className="mt-2 text-xl font-bold tracking-tight text-gray-900">
+          Color Challenge
+        </h2>
 
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+        <p className="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500">
           Ignore the word. Select the actual color of the text.
         </p>
       </div>
 
-      <div className="mx-auto mt-8 max-w-md">
-        <div className="flex items-center justify-between text-sm">
+      <div className="mx-auto mt-6 max-w-xs">
+        <div className="flex items-center justify-between text-xs font-medium">
           <span className="text-gray-500">Time remaining</span>
 
           <span
             className={`font-bold ${
-              timeLeft <= 2 ? "text-red-600" : "text-gray-900"
+              timeLeft <= 2 ? "text-rose-600" : "text-gray-900"
             }`}
           >
             {timeLeft}s
           </span>
         </div>
 
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-100">
           <div
-            className="h-full rounded-full bg-black transition-all duration-300"
+            className="h-full rounded-full bg-gray-900 transition-all duration-300"
             style={{
               width: `${(timeLeft / timeLimit) * 100}%`,
             }}
@@ -692,11 +713,13 @@ function ColorChallenge({ round, disabled, onComplete }) {
         </div>
       </div>
 
-      <div className="mx-auto mt-10 max-w-md text-center">
-        <p className="text-sm text-gray-500">What color is this text?</p>
+      <div className="mx-auto mt-8 max-w-xs text-center">
+        <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+          What color is this text?
+        </p>
 
         <div
-          className="mt-5 text-5xl font-black"
+          className="mt-3 text-4xl font-black tracking-tight"
           style={{
             color: challenge.displayColor.value,
           }}
@@ -705,31 +728,31 @@ function ColorChallenge({ round, disabled, onComplete }) {
         </div>
       </div>
 
-      <div className="mx-auto mt-10 grid max-w-md grid-cols-2 gap-3">
+      <div className="mx-auto mt-8 grid max-w-xs grid-cols-2 gap-2.5">
         {COLORS.map((color) => (
           <button
             key={color.name}
             type="button"
             disabled={disabled || answered}
             onClick={() => handleChoice(color.name)}
-            className="rounded-xl border border-gray-200 bg-white px-5 py-4 font-semibold transition hover:-translate-y-0.5 hover:border-gray-400 hover:shadow-sm disabled:cursor-default disabled:opacity-50"
+            className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-xs transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-default disabled:opacity-50"
           >
             {color.name}
           </button>
         ))}
       </div>
 
-      <div className="mt-8 text-center">
+      <div className="mt-6 text-center">
         {result === "success" && (
-          <p className="text-lg font-semibold text-green-700">✓ Correct</p>
+          <p className="text-base font-semibold text-emerald-700">✓ Correct</p>
         )}
 
         {result === "failed" && (
-          <p className="text-lg font-semibold text-red-700">✕ Incorrect</p>
+          <p className="text-base font-semibold text-rose-700">✕ Incorrect</p>
         )}
 
         {result === "timeout" && (
-          <p className="text-lg font-semibold text-orange-600">⏱ Time's up</p>
+          <p className="text-base font-semibold text-amber-600">⏱ Time's up</p>
         )}
       </div>
     </div>
@@ -813,29 +836,33 @@ function SequenceRecall({ round, disabled, onComplete }) {
 
   return (
     <div className="text-center">
-      <p className="text-sm text-gray-500">Remember the sequence</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+        Remember the sequence
+      </p>
 
-      <p className="mt-1 font-semibold">
+      <p className="mt-1 text-base font-semibold text-gray-900">
         🧠 Watch carefully, then reproduce it
       </p>
 
       {showingSequence ? (
-        <div className="mt-10 rounded-2xl bg-gray-50 p-8">
-          <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
+        <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 p-6">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
             Memorize
           </p>
 
-          <div className="mt-5 flex justify-center gap-5 text-5xl">
+          <div className="mt-4 flex justify-center gap-4 text-3xl sm:text-4xl">
             {sequence.map((value, index) => (
               <span key={`${value}-${index}`}>{symbols[value]}</span>
             ))}
           </div>
         </div>
       ) : (
-        <div className="mt-10">
-          <p className="text-sm text-gray-500">Your sequence</p>
+        <div className="mt-6">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+            Your sequence
+          </p>
 
-          <div className="mt-4 flex min-h-16 justify-center gap-4 text-4xl">
+          <div className="mt-3 flex min-h-12 justify-center gap-3 text-3xl">
             {userSequence.map((value, index) => {
               const isCorrectMatch = value === sequence[index];
               return (
@@ -844,7 +871,7 @@ function SequenceRecall({ round, disabled, onComplete }) {
                   className={
                     isCorrectMatch
                       ? "text-gray-900"
-                      : "text-red-600 animate-bounce"
+                      : "text-rose-600 animate-bounce"
                   }
                 >
                   {symbols[value]}
@@ -853,14 +880,14 @@ function SequenceRecall({ round, disabled, onComplete }) {
             })}
           </div>
 
-          <div className="mt-8 grid grid-cols-3 gap-3">
+          <div className="mt-6 grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
             {symbols.map((symbol, index) => (
               <button
                 key={symbol}
                 type="button"
                 disabled={disabled || mistake || success}
                 onClick={() => handleSymbolClick(index)}
-                className="rounded-xl border border-gray-200 bg-white py-5 text-3xl transition hover:bg-gray-50 active:scale-95 disabled:cursor-default disabled:opacity-60"
+                className="rounded-xl border border-gray-200 bg-white py-4 text-2xl transition hover:bg-gray-50 active:scale-95 disabled:cursor-default disabled:opacity-60 shadow-xs"
               >
                 {symbol}
               </button>
@@ -870,19 +897,19 @@ function SequenceRecall({ round, disabled, onComplete }) {
       )}
 
       {mistake && (
-        <p className="mt-6 text-lg font-semibold text-red-600">
+        <p className="mt-4 text-base font-semibold text-rose-600">
           ✕ Incorrect sequence
         </p>
       )}
 
       {success && (
-        <p className="mt-6 text-lg font-semibold text-green-600">
+        <p className="mt-4 text-base font-semibold text-emerald-600">
           ✓ Perfect sequence!
         </p>
       )}
 
       {!showingSequence && !mistake && !success && (
-        <p className="mt-6 text-xs text-gray-400">
+        <p className="mt-4 text-xs text-gray-400">
           {sequence.length - userSequence.length} symbol
           {sequence.length - userSequence.length === 1 ? "" : "s"} remaining
         </p>
@@ -954,27 +981,29 @@ function DistractionChallenge({ round, disabled, onComplete }) {
   return (
     <div>
       <div className="text-center">
-        <p className="text-sm font-medium uppercase tracking-widest text-gray-400">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
           Distraction Control
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold">Distraction Challenge</h2>
+        <h2 className="mt-2 text-xl font-bold tracking-tight text-gray-900">
+          Distraction Challenge
+        </h2>
 
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+        <p className="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500">
           Focus on the target instruction and ignore everything else moving
           around you.
         </p>
       </div>
 
-      <div className="mx-auto mt-8 max-w-md rounded-2xl border border-gray-200 bg-gray-50 p-6 text-center">
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+      <div className="mx-auto mt-6 max-w-xs rounded-xl border border-gray-100 bg-gray-50 p-4 text-center">
+        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
           Your target
         </p>
 
-        <p className="mt-3 text-sm text-gray-500">Select this color:</p>
+        <p className="mt-1.5 text-xs text-gray-500">Select this color:</p>
 
         <p
-          className="mt-2 text-4xl font-black"
+          className="mt-1 text-3xl font-black tracking-tight"
           style={{
             color: challenge.target.value,
           }}
@@ -985,21 +1014,21 @@ function DistractionChallenge({ round, disabled, onComplete }) {
 
       <div
         className={`
-          relative mx-auto mt-8
-          h-72 max-w-2xl
-          overflow-hidden rounded-2xl
+          relative mx-auto mt-6
+          h-56 max-w-lg
+          overflow-hidden rounded-xl
           border border-gray-200
           bg-white
-          shadow-sm
+          shadow-xs
         `}
       >
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="rounded-full border border-dashed border-gray-200 px-8 py-6 text-center">
-            <p className="text-xs font-medium uppercase tracking-widest text-gray-300">
+          <div className="rounded-lg border border-dashed border-gray-200 px-6 py-4 text-center">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-300">
               Stay focused
             </p>
 
-            <p className="mt-2 text-lg font-semibold text-gray-400">
+            <p className="mt-1 text-sm font-semibold text-gray-400">
               Ignore the noise
             </p>
           </div>
@@ -1008,7 +1037,7 @@ function DistractionChallenge({ round, disabled, onComplete }) {
         {distractors.map((distractor) => (
           <span
             key={distractor.id}
-            className="absolute select-none text-3xl font-black transition-all duration-500 ease-in-out"
+            className="absolute select-none text-2xl font-black transition-all duration-500 ease-in-out"
             style={{
               left: `${distractor.x}%`,
               top: `${distractor.y}%`,
@@ -1025,33 +1054,33 @@ function DistractionChallenge({ round, disabled, onComplete }) {
         ))}
       </div>
 
-      <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-3">
+      <div className="mx-auto mt-6 grid max-w-xs grid-cols-2 gap-2.5">
         {COLORS.map((color) => (
           <button
             key={color.name}
             type="button"
             disabled={disabled || answered}
             onClick={() => handleChoice(color.name)}
-            className="rounded-xl border border-gray-200 bg-white px-5 py-4 font-semibold transition hover:-translate-y-0.5 hover:border-gray-400 hover:shadow-sm disabled:cursor-default disabled:opacity-50"
+            className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-xs transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-default disabled:opacity-50"
           >
             {color.name}
           </button>
         ))}
       </div>
 
-      <div className="mt-8 text-center">
+      <div className="mt-6 text-center">
         {result === "success" && (
-          <p className="text-lg font-semibold text-green-700">
+          <p className="text-base font-semibold text-emerald-700">
             ✓ Excellent focus
           </p>
         )}
 
         {result === "failed" && (
-          <p className="text-lg font-semibold text-red-700">✕ Distracted</p>
+          <p className="text-base font-semibold text-rose-700">✕ Distracted</p>
         )}
       </div>
 
-      <p className="mt-5 text-center text-xs text-gray-400">
+      <p className="mt-4 text-center text-xs text-gray-400">
         {round === 1
           ? "A few distractions will move around you."
           : round === 2

@@ -4,16 +4,6 @@ const getAnalytics = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    const [focusRows] = await pool.query(
-      `SELECT
-         COALESCE(SUM(duration_seconds), 0) AS total_focus_seconds,
-         COUNT(*) AS focus_sessions
-       FROM focus_sessions
-       WHERE user_id = ?
-         AND completed = TRUE`,
-      [userId],
-    );
-
     const [scrollRows] = await pool.query(
       `SELECT
          COALESCE(SUM(duration_seconds), 0) AS total_scroll_seconds,
@@ -46,6 +36,17 @@ const getAnalytics = async (req, res) => {
          AND completed = TRUE`,
       [userId],
     );
+    const [focusForgeRows] = await pool.query(
+      `SELECT
+     COUNT(*) AS sessions,
+     COALESCE(SUM(rounds_played), 0) AS rounds_played,
+     COALESCE(SUM(rounds_completed), 0) AS rounds_completed,
+     COALESCE(AVG(score), 0) AS average_score,
+     COALESCE(SUM(tokens_earned), 0) AS tokens_earned
+   FROM focus_game_sessions
+   WHERE user_id = ?`,
+      [userId],
+    );
 
     const [unlockRows] = await pool.query(
       `SELECT
@@ -63,18 +64,9 @@ const getAnalytics = async (req, res) => {
       [userId],
     );
 
-    const totalFocusSeconds = Number(focusRows[0].total_focus_seconds);
-
     const totalScrollSeconds = Number(scrollRows[0].total_scroll_seconds);
 
-    const focusMinutes = Math.floor(totalFocusSeconds / 60);
-
     const scrollMinutes = Math.floor(totalScrollSeconds / 60);
-
-    const focusToScrollRatio =
-      totalScrollSeconds > 0
-        ? Number((totalFocusSeconds / totalScrollSeconds).toFixed(2))
-        : null;
 
     const questionsAnswered = Number(brainGymRows[0].questions_answered);
 
@@ -89,11 +81,6 @@ const getAnalytics = async (req, res) => {
       tokenRows.length > 0 ? Number(tokenRows[0].balance) : 0;
 
     res.json({
-      focus: {
-        minutes: focusMinutes,
-        sessions: Number(focusRows[0].focus_sessions),
-      },
-
       scroll: {
         minutes: scrollMinutes,
         sessions: Number(scrollRows[0].total_scroll_sessions),
@@ -101,13 +88,20 @@ const getAnalytics = async (req, res) => {
         habitualSessions: Number(scrollRows[0].habitual_sessions || 0),
       },
 
-      focusToScrollRatio,
-
       brainGym: {
         sessions: Number(brainGymRows[0].brain_gym_sessions),
         questionsAnswered,
         correctAnswers,
         accuracy: brainGymAccuracy,
+      },
+      focusForge: {
+        sessions: Number(focusForgeRows[0].sessions),
+        roundsPlayed: Number(focusForgeRows[0].rounds_played),
+        roundsCompleted: Number(focusForgeRows[0].rounds_completed),
+        averageScore: Number(
+          Number(focusForgeRows[0].average_score).toFixed(1),
+        ),
+        tokensEarned: Number(focusForgeRows[0].tokens_earned),
       },
 
       unlocks: {

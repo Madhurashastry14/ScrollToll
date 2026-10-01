@@ -27,14 +27,11 @@ const getDashboardStats = async (req, res) => {
       [userId],
     );
 
-    const totalFocusSeconds = Number(focusRows[0].total_focus_seconds);
-
     const totalScrollSeconds = Number(scrollRows[0].total_scroll_seconds);
 
     const balance = tokenRows.length > 0 ? Number(tokenRows[0].balance) : 0;
 
     res.json({
-      focusTimeMinutes: Math.floor(totalFocusSeconds / 60),
       scrollTimeMinutes: Math.floor(totalScrollSeconds / 60),
       tokenBalance: balance,
     });

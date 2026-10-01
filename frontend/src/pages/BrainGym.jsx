@@ -110,57 +110,64 @@ function BrainGym() {
     }
   };
 
+  const backLink =
+    "inline-flex items-center gap-1.5 rounded-md text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-700";
+  const primaryButton =
+    "inline-flex items-center justify-center rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-900 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-40";
+
   if (!selectedDomain) {
     return (
-      <div className="min-h-screen bg-gray-50 px-6 py-10">
-        <div className="mx-auto max-w-5xl">
-          <Link
-            to="/dashboard"
-            className="text-sm text-gray-500 hover:text-gray-900"
-          >
-            ← Back to Dashboard
+      <div className="min-h-screen bg-[#f6f6f3] px-4 py-8 text-zinc-900 sm:px-6 sm:py-12">
+        <div className="st-enter mx-auto max-w-4xl">
+          <Link to="/dashboard" className={backLink}>
+            <span aria-hidden="true">←</span> Back to Dashboard
           </Link>
 
-          <div className="mt-10">
-            <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
-              Brain Gym
-            </p>
-
-            <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900">
-              Choose your challenge
+          <div className="mt-6 max-w-2xl">
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Brain Gym: choose your challenge
             </h1>
 
-            <p className="mt-3 max-w-2xl text-gray-600">
+            <p className="mt-2 text-sm leading-relaxed text-zinc-600 sm:text-base">
               Complete three questions to earn Scroll Tokens.
             </p>
           </div>
 
           {error && (
-            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div
+              role="alert"
+              className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            >
               {error}
             </div>
           )}
 
-          <div className="mt-8 grid gap-5 md:grid-cols-2">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 sm:gap-4">
             {domains.map((domain) => (
               <button
                 key={domain.id}
                 type="button"
                 onClick={() => startQuiz(domain.id)}
                 disabled={loading}
-                className="rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-gray-400 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                className="group rounded-xl border border-zinc-200 bg-white p-5 text-left transition hover:border-zinc-700/40 hover:bg-zinc-50/30 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 sm:p-6"
               >
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-base font-semibold text-zinc-900">
                   {domain.name}
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-gray-600">
+                <p className="mt-1.5 text-sm leading-relaxed text-zinc-600">
                   {domain.description}
                 </p>
 
-                <p className="mt-5 text-sm font-medium text-gray-900">
-                  3 questions →
-                </p>
+                <div className="mt-4 flex items-center gap-1.5 text-xs font-medium text-zinc-900">
+                  <span>3 questions</span>
+                  <span
+                    className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"
+                    aria-hidden="true"
+                  >
+                    →
+                  </span>
+                </div>
               </button>
             ))}
           </div>
@@ -171,105 +178,101 @@ function BrainGym() {
 
   if (result) {
     return (
-      <div className="min-h-screen bg-gray-50 px-6 py-10">
-        <div className="mx-auto max-w-4xl">
-          <Link
-            to="/dashboard"
-            className="text-sm text-gray-500 hover:text-gray-900"
-          >
-            ← Back to Dashboard
+      <div className="min-h-screen bg-[#f6f6f3] px-4 py-8 text-zinc-900 sm:px-6 sm:py-12">
+        <div className="st-enter mx-auto max-w-3xl">
+          <Link to="/dashboard" className={backLink}>
+            <span aria-hidden="true">←</span> Back to Dashboard
           </Link>
 
-          <div className="mt-8 rounded-2xl bg-white p-8 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
-              Brain Gym Complete
-            </p>
+          <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5 sm:p-7">
+            <p className="text-sm text-zinc-500">Brain Gym complete</p>
 
-            <h1 className="mt-2 text-3xl font-bold text-gray-900">
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
               {result.correctAnswers} / {result.questionsAnswered} correct
             </h1>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl bg-gray-50 p-5">
-                <p className="text-sm text-gray-500">Tokens earned</p>
-                <p className="mt-1 text-2xl font-bold text-gray-900">
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="st-pop rounded-lg bg-zinc-50 p-4 sm:p-5">
+                <p className="text-sm text-zinc-900/70">Tokens earned</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-900">
                   +{result.tokensEarned}
                 </p>
               </div>
 
-              <div className="rounded-xl bg-gray-50 p-5">
-                <p className="text-sm text-gray-500">Token balance</p>
-                <p className="mt-1 text-2xl font-bold text-gray-900">
+              <div className="rounded-lg bg-zinc-50 p-4 sm:p-5">
+                <p className="text-sm text-zinc-500">Token balance</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-900">
                   {result.balance}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 space-y-5">
+          <div className="mt-4 space-y-3 sm:space-y-4">
             {result.questions.map((question, index) => {
               const options = question.options;
 
               return (
                 <div
                   key={question.questionId}
-                  className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+                  className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-500">
+                      <p className="text-xs font-medium text-zinc-500">
                         Question {index + 1}
                       </p>
 
-                      <h2 className="mt-2 text-lg font-semibold text-gray-900">
+                      <h2 className="mt-1 text-base font-semibold leading-snug text-zinc-900">
                         {question.question}
                       </h2>
                     </div>
 
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-medium ${
                         question.isCorrect
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                          ? "bg-emerald-50 text-emerald-800"
+                          : "bg-rose-50 text-rose-800"
                       }`}
                     >
                       {question.isCorrect ? "Correct" : "Incorrect"}
                     </span>
                   </div>
 
-                  <div className="mt-5 space-y-2">
+                  <div className="mt-4 space-y-2">
                     {Object.entries(options).map(([letter, text]) => (
                       <div
                         key={letter}
-                        className={`rounded-xl border p-3 text-sm ${
+                        className={`rounded-lg border px-3.5 py-2.5 text-sm ${
                           letter === question.correctAnswer
-                            ? "border-green-300 bg-green-50"
+                            ? "border-emerald-300 bg-emerald-50/70 font-medium text-emerald-900"
                             : letter === question.userAnswer
-                              ? "border-red-300 bg-red-50"
-                              : "border-gray-200 bg-gray-50"
+                              ? "border-rose-300 bg-rose-50/70 font-medium text-rose-900"
+                              : "border-zinc-200 bg-white text-zinc-700"
                         }`}
                       >
-                        <span className="font-semibold">{letter}.</span> {text}
+                        <span className="mr-1.5 font-semibold">{letter}.</span>{" "}
+                        {text}
                       </div>
                     ))}
                   </div>
 
                   {!question.isCorrect && (
-                    <p className="mt-4 text-sm text-gray-600">
+                    <p className="mt-3 text-xs text-zinc-600">
                       Your answer:{" "}
-                      <span className="font-semibold">
+                      <span className="font-semibold text-zinc-900">
                         {question.userAnswer}
                       </span>
                     </p>
                   )}
 
                   {question.explanation && (
-                    <div className="mt-5 rounded-xl bg-gray-50 p-4">
-                      <p className="text-sm font-semibold text-gray-900">
+                    <div className="mt-4 rounded-lg bg-zinc-50 p-4">
+                      <p className="text-xs font-semibold text-zinc-700">
                         Explanation
                       </p>
 
-                      <p className="mt-1 text-sm leading-6 text-gray-600">
+                      <p className="mt-1 text-sm leading-relaxed text-zinc-600">
                         {question.explanation}
                       </p>
                     </div>
@@ -279,11 +282,8 @@ function BrainGym() {
             })}
           </div>
 
-          <div className="mt-8">
-            <Link
-              to="/dashboard"
-              className="inline-flex rounded-xl bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800"
-            >
+          <div className="mt-6">
+            <Link to="/dashboard" className={primaryButton}>
               Back to Dashboard
             </Link>
           </div>
@@ -298,29 +298,32 @@ function BrainGym() {
   const isLastQuestion = currentQuestion === questions.length - 1;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="mx-auto max-w-3xl">
-        <Link
-          to="/dashboard"
-          className="text-sm text-gray-500 hover:text-gray-900"
-        >
-          ← Exit Brain Gym
+    <div className="min-h-screen bg-[#f6f6f3] px-4 py-8 text-zinc-900 sm:px-6 sm:py-12">
+      <div className="st-enter mx-auto max-w-2xl">
+        <Link to="/dashboard" className={backLink}>
+          <span aria-hidden="true">←</span> Exit Brain Gym
         </Link>
 
-        <div className="mt-8 flex items-center justify-between">
+        <div className="mt-6 flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-gray-500">
+            <p className="text-xs font-medium text-zinc-900">
               {domains.find((domain) => domain.id === selectedDomain)?.name}
             </p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-0.5 text-sm font-medium text-zinc-900">
               Question {currentQuestion + 1} of {questions.length}
             </p>
           </div>
 
-          <div className="h-2 w-32 overflow-hidden rounded-full bg-gray-200">
+          <div
+            className="h-1.5 w-28 overflow-hidden rounded-full bg-zinc-200 sm:w-36"
+            role="progressbar"
+            aria-valuemin={1}
+            aria-valuemax={questions.length}
+            aria-valuenow={currentQuestion + 1}
+          >
             <div
-              className="h-full rounded-full bg-black transition-all"
+              className="h-full rounded-full bg-teal-700 transition-all duration-300 motion-reduce:transition-none"
               style={{
                 width: `${((currentQuestion + 1) / questions.length) * 100}%`,
               }}
@@ -329,21 +332,24 @@ function BrainGym() {
         </div>
 
         {error && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div
+            role="alert"
+            className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          >
             {error}
           </div>
         )}
 
-        <div className="mt-8 rounded-2xl bg-white p-7 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">
+        <div className="mt-5 rounded-xl border border-zinc-200 bg-white p-5 sm:p-8">
+          <p className="text-xs font-medium capitalize text-zinc-500">
             {question.difficulty}
           </p>
 
-          <h1 className="mt-3 text-2xl font-bold leading-9 text-gray-900">
+          <h1 className="mt-2 text-xl font-semibold leading-snug text-zinc-900 sm:text-2xl">
             {question.question}
           </h1>
 
-          <div className="mt-8 space-y-3">
+          <div className="mt-6 space-y-2.5 sm:mt-8 sm:space-y-3">
             {Object.entries(options).map(([letter, text]) => {
               const isSelected = selectedAnswer === letter;
 
@@ -352,13 +358,23 @@ function BrainGym() {
                   key={letter}
                   type="button"
                   onClick={() => selectAnswer(question.id, letter)}
-                  className={`w-full rounded-xl border p-4 text-left transition ${
+                  aria-pressed={isSelected}
+                  className={`flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3.5 text-left text-sm transition active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:p-4 sm:text-base ${
                     isSelected
-                      ? "border-black bg-gray-100"
-                      : "border-gray-200 bg-white hover:border-gray-400"
-                  } cursor-pointer`}
+                      ? "border-zinc-700 bg-zinc-50/60 font-medium ring-1 ring-zinc-700"
+                      : "border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50"
+                  }`}
                 >
-                  <span className="font-semibold">{letter}.</span> {text}
+                  <span
+                    className={`mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-semibold ${
+                      isSelected
+                        ? "bg-zinc-900 text-white"
+                        : "bg-zinc-100 text-zinc-700"
+                    }`}
+                  >
+                    {letter}
+                  </span>
+                  <span className="pt-px">{text}</span>
                 </button>
               );
             })}
@@ -370,16 +386,19 @@ function BrainGym() {
                 type="button"
                 onClick={nextQuestion}
                 disabled={!selectedAnswer}
-                className="rounded-xl bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
+                className={`${primaryButton} w-full sm:w-auto`}
               >
-                Next →
+                Next{" "}
+                <span className="ml-1.5" aria-hidden="true">
+                  →
+                </span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={submitQuiz}
                 disabled={!selectedAnswer || loading}
-                className="rounded-xl bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
+                className={`${primaryButton} w-full sm:w-auto`}
               >
                 {loading ? "Submitting..." : "Submit Quiz"}
               </button>
