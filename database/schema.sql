@@ -14,6 +14,12 @@ CREATE TABLE focus_sessions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     duration_seconds INT NOT NULL,
+    goal VARCHAR(255) NULL,
+    outcome ENUM(
+        'completed',
+        'partial',
+        'not_completed'
+    ) NULL,
     completed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -23,6 +29,38 @@ CREATE TABLE focus_sessions (
         ON DELETE CASCADE,
 
     INDEX idx_focus_user (user_id)
+);
+
+CREATE TABLE focus_game_sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT NOT NULL,
+
+    game_type ENUM(
+        'target_focus',
+        'odd_one_out',
+        'color_challenge',
+        'sequence_recall',
+        'distraction_challenge'
+    ) NOT NULL,
+
+    rounds_played INT NOT NULL DEFAULT 0,
+
+    rounds_completed INT NOT NULL DEFAULT 0,
+
+    score INT NOT NULL DEFAULT 0,
+
+    tokens_earned INT NOT NULL DEFAULT 0,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_focus_game_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    INDEX idx_focus_game_user (user_id),
+    INDEX idx_focus_game_type (game_type)
 );
 
 CREATE TABLE brain_gym_questions (

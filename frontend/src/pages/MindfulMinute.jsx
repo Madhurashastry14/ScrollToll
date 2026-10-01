@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
@@ -6,21 +6,34 @@ function MindfulMinute() {
   const [remainingSeconds, setRemainingSeconds] = useState(60);
   const [started, setStarted] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [stopped, setStopped] = useState(false);
   const [reflection, setReflection] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
+  const timerRef = useRef(null);
+  const completingRef = useRef(false);
+
   useEffect(() => {
-    if (!started || completed || remainingSeconds <= 0) {
+    if (!started || completed || stopped) {
       return;
     }
 
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setRemainingSeconds((previous) => {
         if (previous <= 1) {
-          clearInterval(timer);
+          clearInterval(timerRef.current);
+
+          completingRef.current = true;
           setCompleted(true);
+
+          if (document.fullscreenElement) {
+            document.exitFullscreen().catch((error) => {
+              console.error("Fullscreen exit failed:", error);
+            });
+          }
+
           return 0;
         }
 
@@ -28,12 +41,52 @@ function MindfulMinute() {
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [started, completed, remainingSeconds]);
+    return () => {
+      clearInterval(timerRef.current);
+    };
+  }, [started, completed, stopped]);
 
-  const startMindfulMinute = () => {
-    setStarted(true);
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (
+        !document.fullscreenElement &&
+        started &&
+        !completed &&
+        !completingRef.current
+      ) {
+        clearInterval(timerRef.current);
+
+        setStarted(false);
+        setStopped(true);
+        setRemainingSeconds(60);
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, [started, completed]);
+
+  const startMindfulMinute = async () => {
     setError("");
+    setStopped(false);
+    setCompleted(false);
+    completingRef.current = false;
+    setRemainingSeconds(60);
+
+    try {
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        await document.documentElement.webkitRequestFullscreen();
+      }
+    } catch (error) {
+      console.error("Fullscreen request failed:", error);
+    }
+
+    setStarted(true);
   };
 
   const submitReflection = async () => {
@@ -46,7 +99,7 @@ function MindfulMinute() {
       setSubmitting(true);
       setError("");
 
-      const data = await apiRequest("/activity/mindful-minute", {
+      const data = await apiRequest("/activities/mindful-minute", {
         method: "POST",
         body: JSON.stringify({
           durationSeconds: 60,
@@ -56,6 +109,7 @@ function MindfulMinute() {
 
       setResult(data);
     } catch (err) {
+      console.error("Mindful Minute submission failed:", err);
       setError(err.message);
     } finally {
       setSubmitting(false);
@@ -154,9 +208,9 @@ function MindfulMinute() {
     );
   }
 
-  if (!completed) {
+  if (!completed && !stopped) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-6">
+      <div className="flex min-h-screen items-center justify-center bg-white px-6">
         <div className="max-w-md text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
             Mindful Minute
@@ -171,6 +225,7 @@ function MindfulMinute() {
             <br />
             Notice your attention without judging it.
           </p>
+          <p className="mt-8 text-xs text-gray-400">Press Esc to stop</p>
         </div>
       </div>
     );

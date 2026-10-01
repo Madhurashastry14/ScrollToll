@@ -1,167 +1,109 @@
-import { useEffect, useState } from "react";
-import { apiRequest } from "../services/api";
-const SESSION_DURATION = 60;
+import { Link } from "react-router-dom";
+
+const games = [
+  {
+    id: "target_focus",
+    title: "Target Focus",
+    description: "Find all the target symbols hidden in the grid.",
+    icon: "🎯",
+  },
+  {
+    id: "odd_one_out",
+    title: "Odd One Out",
+    description: "Spot the one item that is different from the rest.",
+    icon: "🔎",
+  },
+  {
+    id: "color_challenge",
+    title: "Color Challenge",
+    description: "Ignore the word and respond to its actual color.",
+    icon: "🎨",
+  },
+  {
+    id: "sequence_recall",
+    title: "Sequence Recall",
+    description: "Remember a sequence and reproduce it correctly.",
+    icon: "🧠",
+  },
+  {
+    id: "distraction_challenge",
+    title: "Distraction Challenge",
+    description: "Stay focused on the task while distractions appear.",
+    icon: "🔔",
+  },
+];
 
 function FocusForge() {
-  const [timeLeft, setTimeLeft] = useState(SESSION_DURATION);
-  const [isRunning, setIsRunning] = useState(false);
-  const [completed, setCompleted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [reward, setReward] = useState(null);
-  const completeSession = async () => {
-    setSubmitting(true);
-
-    try {
-      const data = await apiRequest("/activities/focus-forge", {
-        method: "POST",
-        body: JSON.stringify({
-          durationSeconds: SESSION_DURATION,
-        }),
-      });
-
-      setReward(data);
-      setCompleted(true);
-    } catch (error) {
-      console.error("Focus Forge submission failed:", error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!isRunning) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft((previousTime) => {
-        if (previousTime <= 1) {
-          clearInterval(timer);
-
-          setTimeout(() => {
-            completeSession();
-          }, 0);
-
-          return 0;
-        }
-
-        return previousTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isRunning]);
-
-  const resetSession = () => {
-    setTimeLeft(SESSION_DURATION);
-    setIsRunning(false);
-    setCompleted(false);
-    setReward(null);
-  };
-
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-
   return (
-    <div className="min-h-screen px-6 py-10">
-      <div className="mx-auto max-w-2xl">
-        <div>
-          <p className="text-sm font-medium text-gray-500">
+    <div className="min-h-screen px-6 py-12">
+      <div className="mx-auto max-w-6xl">
+        <Link
+          to="/dashboard"
+          className="text-sm text-gray-500 transition hover:text-gray-900"
+        >
+          ← Back to Dashboard
+        </Link>
+
+        <div className="mt-10 max-w-2xl">
+          <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">
             Productivity Activity
           </p>
 
-          <h1 className="mt-1 text-3xl font-bold text-gray-900">Focus Forge</h1>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight">
+            Focus Forge
+          </h1>
 
-          <p className="mt-2 text-gray-600">
-            Stay focused for a short session before you scroll.
+          <p className="mt-4 text-gray-600">
+            Train your attention through quick focus challenges. Choose a game
+            and complete three rounds.
           </p>
         </div>
 
-        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-          {completed ? (
-            <>
-              <p className="text-sm font-medium text-gray-500">
-                Session Complete
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {games.map((game) => (
+            <Link
+              key={game.id}
+              to={`/focus-forge/${game.id}`}
+              className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-gray-400 hover:shadow-md"
+            >
+              <div className="text-4xl">{game.icon}</div>
+
+              <h2 className="mt-5 text-xl font-semibold">{game.title}</h2>
+
+              <p className="mt-2 text-sm leading-6 text-gray-600">
+                {game.description}
               </p>
 
-              <h2 className="mt-3 text-3xl font-bold text-gray-900">
-                Well done!
-              </h2>
+              <div className="mt-6 text-sm font-semibold">Play →</div>
+            </Link>
+          ))}
+        </div>
 
-              <p className="mt-4 text-gray-600">
-                You completed your focus session.
+        <div className="mt-10 rounded-2xl border border-gray-200 bg-gray-50 p-6">
+          <p className="text-sm font-medium text-gray-900">
+            How Focus Forge works
+          </p>
+
+          <div className="mt-4 grid gap-4 text-sm text-gray-600 sm:grid-cols-3">
+            <div>
+              <p className="font-semibold text-gray-900">1. Choose</p>
+              <p className="mt-1">Pick the focus game you want to play.</p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-900">2. Play</p>
+              <p className="mt-1">
+                Complete three increasingly challenging rounds.
               </p>
-              {reward && (
-                <div className="mt-6 rounded-xl bg-gray-50 p-5">
-                  <p className="text-sm text-gray-500">Tokens earned</p>
+            </div>
 
-                  <p className="mt-1 text-3xl font-bold text-gray-900">
-                    +{reward.tokensEarned}
-                  </p>
-
-                  <p className="mt-2 text-sm text-gray-500">
-                    Current balance: {reward.balance}
-                  </p>
-                </div>
-              )}
-
-              <button
-                onClick={resetSession}
-                className="mt-8 rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:opacity-80"
-              >
-                Start Again
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="text-sm font-medium text-gray-500">Focus Session</p>
-
-              <div className="mt-8 text-7xl font-bold tracking-tight text-gray-900">
-                {minutes}:{String(seconds).padStart(2, "0")}
-              </div>
-
-              <p className="mt-4 text-sm text-gray-500">
-                Put away distractions and focus on one task.
+            <div>
+              <p className="font-semibold text-gray-900">3. Earn</p>
+              <p className="mt-1">
+                Your performance determines the Scroll Tokens you earn.
               </p>
-
-              <div className="mt-8 flex justify-center gap-3">
-                {!isRunning ? (
-                  <button
-                    onClick={() => setIsRunning(true)}
-                    disabled={submitting}
-                    className="rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Start Focus
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setIsRunning(false)}
-                    disabled={submitting}
-                    className="rounded-xl border border-gray-300 px-6 py-3 font-semibold text-gray-900 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Pause
-                  </button>
-                )}
-
-                <button
-                  onClick={resetSession}
-                  disabled={submitting}
-                  className="rounded-xl border border-gray-300 px-6 py-3 font-semibold text-gray-900 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Reset
-                </button>
-                {timeLeft === 0 && (
-                  <button
-                    onClick={completeSession}
-                    disabled={submitting}
-                    className="rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {submitting ? "Saving..." : "Complete Session"}
-                  </button>
-                )}
-              </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

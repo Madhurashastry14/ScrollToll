@@ -5,6 +5,7 @@ const {
   submitBrainGym,
   completeFocusForge,
   completeMindfulMinute,
+  completeFocusGame,
 } = require("../controllers/activityController");
 
 const authenticateToken = require("../middleware/authMiddleware");
@@ -15,5 +16,6 @@ router.post("/brain-gym/start", authenticateToken, startBrainGym);
 router.post("/brain-gym/submit", authenticateToken, submitBrainGym);
 router.post("/focus-forge", authenticateToken, completeFocusForge);
 router.post("/mindful-minute", authenticateToken, completeMindfulMinute);
+router.post("/focus-game", authenticateToken, completeFocusGame);
 
 module.exports = router;
