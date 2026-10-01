@@ -1,6 +1,5 @@
 const pool = require("../config/db");
-const { addTokens } = require("../services/tokenService");
-
+const { addTokens, getTokenBalance } = require("../services/tokenService");
 const startBrainGym = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -249,7 +248,7 @@ const completeFocusForge = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    const { durationSeconds } = req.body;
+    const { durationSeconds, goal, outcome } = req.body;
 
     if (!Number.isInteger(durationSeconds)) {
       return res.status(400).json({
@@ -257,33 +256,75 @@ const completeFocusForge = async (req, res) => {
       });
     }
 
-    if (durationSeconds < 60) {
+    if (durationSeconds < 1) {
       return res.status(400).json({
-        message: "Focus session must be at least 60 seconds",
+        message: "Focus session must be at least 1 second",
+      });
+    }
+
+    if (typeof goal !== "string" || goal.trim().length === 0) {
+      return res.status(400).json({
+        message: "Focus goal is required",
+      });
+    }
+
+    const validOutcomes = ["completed", "partial", "not_completed"];
+
+    if (!validOutcomes.includes(outcome)) {
+      return res.status(400).json({
+        message: "Invalid focus outcome",
+      });
+    }
+
+    const trimmedGoal = goal.trim();
+
+    if (trimmedGoal.length > 255) {
+      return res.status(400).json({
+        message: "Focus goal must be 255 characters or less",
       });
     }
 
     const [result] = await pool.query(
       `INSERT INTO focus_sessions
-       (user_id, duration_seconds, completed)
-       VALUES (?, ?, TRUE)`,
-      [userId, durationSeconds],
+       (
+         user_id,
+         duration_seconds,
+         goal,
+         outcome,
+         completed
+       )
+       VALUES (?, ?, ?, ?, TRUE)`,
+      [userId, durationSeconds, trimmedGoal, outcome],
     );
 
-    // 1 token for every completed minute,
-    // capped at 5 tokens per session.
-    const minutes = Math.floor(durationSeconds / 60);
+    let tokensEarned = 0;
 
-    const tokensEarned = Math.min(minutes, 5);
+    if (outcome === "completed") {
+      const minutes = Math.floor(durationSeconds / 60);
 
-    const newBalance = await addTokens(userId, tokensEarned);
+      tokensEarned = Math.min(minutes, 5);
+    } else if (outcome === "partial") {
+      tokensEarned = 1;
+    }
+
+    let newBalance;
+
+    if (tokensEarned > 0) {
+      newBalance = await addTokens(userId, tokensEarned);
+    } else {
+      newBalance = await getTokenBalance(userId);
+    }
 
     res.status(201).json({
       message: "Focus session completed",
+
       session: {
         id: result.insertId,
         durationSeconds,
+        goal: trimmedGoal,
+        outcome,
       },
+
       tokensEarned,
       balance: newBalance,
     });
@@ -353,9 +394,101 @@ const completeMindfulMinute = async (req, res) => {
     });
   }
 };
+
+const completeFocusGame = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const { gameType, roundsPlayed, roundsCompleted, score } = req.body;
+
+    const validGameTypes = [
+      "target_focus",
+      "odd_one_out",
+      "color_challenge",
+      "sequence_recall",
+      "distraction_challenge",
+    ];
+
+    if (!validGameTypes.includes(gameType)) {
+      return res.status(400).json({
+        message: "Invalid Focus Forge game",
+      });
+    }
+
+    if (!Number.isInteger(roundsPlayed) || roundsPlayed !== 3) {
+      return res.status(400).json({
+        message: "A Focus Forge session must contain 3 rounds",
+      });
+    }
+
+    if (
+      !Number.isInteger(roundsCompleted) ||
+      roundsCompleted < 0 ||
+      roundsCompleted > roundsPlayed
+    ) {
+      return res.status(400).json({
+        message: "Invalid completed round count",
+      });
+    }
+
+    if (!Number.isInteger(score) || score < 0 || score > 100) {
+      return res.status(400).json({
+        message: "Invalid Focus Forge score",
+      });
+    }
+
+    let tokensEarned;
+
+    if (roundsCompleted >= 3) {
+      tokensEarned = 3;
+    } else if (roundsCompleted === 2) {
+      tokensEarned = 2;
+    } else {
+      tokensEarned = 1;
+    }
+
+    const [result] = await pool.query(
+      `INSERT INTO focus_game_sessions
+       (
+         user_id,
+         game_type,
+         rounds_played,
+         rounds_completed,
+         score,
+         tokens_earned
+       )
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [userId, gameType, roundsPlayed, roundsCompleted, score, tokensEarned],
+    );
+
+    const newBalance = await addTokens(userId, tokensEarned);
+
+    res.status(201).json({
+      message: "Focus Forge game completed",
+
+      session: {
+        id: result.insertId,
+        gameType,
+        roundsPlayed,
+        roundsCompleted,
+        score,
+      },
+
+      tokensEarned,
+      balance: newBalance,
+    });
+  } catch (error) {
+    console.error("Focus Forge game error:", error);
+
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
 module.exports = {
   startBrainGym,
   submitBrainGym,
   completeFocusForge,
   completeMindfulMinute,
+  completeFocusGame,
 };
