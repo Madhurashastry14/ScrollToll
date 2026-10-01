@@ -2,305 +2,102 @@
 
 > **Earn your scroll. Control your attention.**
 
-ScrollToll is a digital wellbeing platform designed to make short-form content consumption more intentional.
-
-Instead of completely blocking entertainment, ScrollToll introduces a controlled layer of friction between the user's impulse to scroll and continued access to short-form content.
-
-Users can complete productive activities such as cognitive challenges or focused work sessions to unlock limited access to a controlled short-video feed.
-
----
+ScrollToll is a digital wellbeing platform that makes short-form content consumption more intentional by introducing a token-based system between users and scrolling.
 
 ## Problem
 
-Short-form platforms are designed around continuous scrolling. Users may open a feed intending to watch a few videos but continue scrolling much longer than planned.
+Short-form content platforms are designed around continuous scrolling. Users often intend to watch a few videos but end up spending much more time than planned.
 
-Existing screen-time solutions primarily focus on:
-
-- Measuring screen time
-- Sending reminders
-- Blocking applications
-- Setting usage limits
-
-These approaches can be easy to ignore or disable.
-
-ScrollToll explores a different approach: **make continued scrolling more intentional rather than simply blocking it.**
-
----
+Traditional screen-time limits focus mainly on duration. ScrollToll focuses on **intentionality before scrolling**.
 
 ## Solution
 
-ScrollToll introduces a **Productivity Gate** between the user and the short-form feed.
+ScrollToll introduces a simple **Scroll Token** system.
 
-A simplified flow is:
+Users earn tokens by completing intentional activities:
 
-```text
-Want to scroll
-      ↓
-Intentionality / Productivity Gate
-      ↓
-Complete a productive activity
-      ↓
-Earn Scroll Token
-      ↓
-Unlock controlled short-video feed
-      ↓
-Limited scrolling session
-      ↓
-Session expires
-      ↓
-Feed locks
-```
+- **Brain Gym** – Logic, patterns, math, memory and attention challenges
+- **Focus Forge** – Short attention-focused games
+- **Mindful Minute** – A 60-second intentional pause and reflection
 
-The system can gradually introduce additional friction when repeated scrolling sessions become excessive.
+Users spend their earned tokens to unlock a limited scrolling session.
 
----
+**1 Scroll Token = 2 minutes of scrolling**
 
-## Core Features
+This creates a deliberate decision before entering a scrolling session.
 
-### 1. Productivity Gate
+## Key Features
 
-A gateway between the user and the short-form feed.
+- Token-based scrolling system
+- Focus Forge with multiple attention games
+- Mindful Minute reflections
+- Controlled short-form content feed
+- Scroll session tracking
+- Dashboard and behavioral analytics
 
-Users can choose different activities to earn access.
+## Tech Stack
 
-### 2. Brain Gym
+**Frontend:** React, Vite, JavaScript, Tailwind CSS, React Router
 
-Short cognitive challenges such as:
+**Backend:** Node.js, Express.js, REST API, JWT Authentication, bcrypt
 
-- Mental arithmetic
-- Vocabulary
-- Logical questions
-- Trivia
+**Database:** MySQL
 
-Completing a valid session can earn a Scroll Token.
+**External API:** YouTube Data API v3
 
-### 3. Focus Forge
+**Tools:** Git, GitHub, GitHub Actions
 
-A focused work session using a timer.
+## Project Structure
 
-Example:
-
-```text
-Start Focus Session
-        ↓
-Focus
-        ↓
-Complete Session
-        ↓
-Earn Scroll Token
-```
-
-### 4. Mindful Minute
-
-A short reflection activity designed to encourage users to pause before continuing to scroll.
-
-### 5. Scroll Tokens
-
-Virtual tokens earned through productive activities.
-
-Tokens provide controlled access to the short-video feed.
-
-### 6. Controlled Short-Video Feed
-
-ScrollToll uses its own controlled short-video feed rather than directly controlling Instagram or YouTube.
-
-This allows the application to control:
-
-- Session duration
-- Scroll events
-- Video playback
-- Session expiry
-- Feed locking
-- Usage analytics
-
-### 7. Adaptive Friction
-
-The system can adjust the amount of friction based on recent usage patterns.
-
-For example:
-
-```text
-Normal usage
-     ↓
-Small intentionality check
-     ↓
-Repeated extended usage
-     ↓
-Increased friction
-```
-
-The goal is not to punish users but to interrupt automatic scrolling behavior.
-
-### 8. Behavioral Analytics
-
-The dashboard can provide information such as:
-
-- Total focus time
-- Total scrolling time
-- Number of unlocks
-- Intentional sessions
-- Habitual sessions
-- Focus-to-scroll ratio
-- Scroll patterns
-- Productivity activity
-
-These are presented as usage patterns rather than medical or psychological diagnoses.
-
----
-
-# Tech Stack
-
-## Frontend
-
-- React
-- Vite
-- Tailwind CSS
-- Framer Motion
-- Recharts
-
-## Backend
-
-- Node.js
-- Express.js
-- JWT
-- bcrypt
-
-## Database
-
-- MySQL
-
-## Development
-
-- Git
-- GitHub
-- Postman / Thunder Client
-
----
-
-# Architecture
-
-```text
-                    ┌────────────────────┐
-                    │      React         │
-                    │     Frontend       │
-                    └─────────┬──────────┘
-                              │
-                              │ REST API
-                              ↓
-                    ┌────────────────────┐
-                    │     Express.js     │
-                    │      Backend       │
-                    └─────────┬──────────┘
-                              │
-             ┌────────────────┼────────────────┐
-             │                │                │
-             ↓                ↓                ↓
-       Authentication    Business Logic    Analytics
-             │                │                │
-             └────────────────┼────────────────┘
-                              ↓
-                    ┌────────────────────┐
-                    │       MySQL        │
-                    │      Database      │
-                    └────────────────────┘
-```
-
----
-
-# Project Structure
-
-```text
 scrolltoll/
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── context/
-│   │   ├── hooks/
-│   │   ├── layouts/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   ├── App.jsx
-│   │   ├── index.css
-│   │   └── main.jsx
-│   │
-│   └── package.json
-│
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   └── server.js
-│   │
-│   ├── .env
-│   └── package.json
+├── .github/
+│ └── workflows/
 │
 ├── database/
-│   └── schema.sql
+│ ├── schema.sql
+│ └── seed.sql
+│
+├── backend/
+│ ├── src/
+│ │ ├── config/
+│ │ ├── controllers/
+│ │ ├── middleware/
+│ │ ├── routes/
+│ │ ├── services/
+│ │ └── server.js
+│ └── package.json
+│
+├── frontend/
+│ ├── public/
+│ ├── src/
+│ │ ├── components/
+│ │ ├── context/
+│ │ ├── layouts/
+│ │ ├── pages/
+│ │ ├── services/s
+│ └── package.json
 │
 ├── .gitignore
 └── README.md
-```
 
----
+## Getting Started
 
-# Local Development
+### Prerequisites
 
-## Prerequisites
-
-Install the following:
-
-- Node.js
+- Node.js 20+
 - npm
 - MySQL
 - Git
+- YouTube Data API v3 key
 
----
-
-## 1. Clone the repository
-
-```bash
-git clone <repository-url>
-cd scrolltoll
-```
-
----
-
-## 2. Setup the frontend
+### 1. Clone the Repository
 
 ```bash
-cd frontend
-npm install
-npm run dev
+git clone <REPOSITORY_URL>
+cd <REPOSITORY_NAME>
 ```
 
-The frontend will run using the Vite development server.
-
----
-
-## 3. Setup the backend
-
-Open another terminal:
-
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-The backend runs on:
-
-```text
-http://localhost:5000
-```
-
----
-
-## 4. Setup MySQL
+### 2. Set Up the Database
 
 Create the database:
 
@@ -308,23 +105,21 @@ Create the database:
 CREATE DATABASE scrolltoll;
 ```
 
-Then execute the schema:
+Import the schema and seed data:
 
-```text
-database/schema.sql
+```bash
+mysql -u root -p scrolltoll < database/schema.sql
+mysql -u root -p scrolltoll < database/seed.sql
 ```
 
----
+### 3. Configure the Backend
 
-## 5. Environment Variables
-
-Create:
-
-```text
-backend/.env
+```bash
+cd backend
+npm install
 ```
 
-Example:
+Create `backend/.env`:
 
 ```env
 PORT=5000
@@ -333,52 +128,64 @@ DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_NAME=scrolltoll
+DB_PORT=3306
 
-JWT_SECRET=your_development_secret
+JWT_SECRET=your_jwt_secret
+YOUTUBE_API_KEY=your_youtube_api_key
+
+FRONTEND_URL=http://localhost:5173
 ```
 
-**Never commit `.env` files to GitHub.**
+Start the backend:
 
----
-
-# API
-
-The backend exposes REST API endpoints for:
-
-```text
-/api/auth
-/api/focus
-/api/brain-gym
-/api/scroll
-/api/unlock
-/api/reflections
-/api/analytics
+```bash
+npm run dev
 ```
 
-The API will be expanded as development continues.
+### 4. Configure the Frontend
 
-# Security Principles
+Open another terminal:
 
-ScrollToll follows several basic security principles:
+```bash
+cd frontend
+npm install
+```
 
-- Passwords are hashed using bcrypt.
-- Authentication uses signed JWTs.
-- Database credentials are stored in environment variables.
-- `.env` files are excluded from Git.
-- User-specific resources are protected by authentication.
-- Important productivity and unlock decisions are validated on the server.
-- The client is not treated as the source of truth for token balances or unlock eligibility.
+Create `frontend/.env`:
 
-# Project Goal
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
 
-ScrollToll aims to explore a different approach to digital wellbeing:
+Start the frontend:
 
-> **Entertainment doesn't have to be eliminated. The goal is to make consumption intentional.**
+```bash
+npm run dev
+```
 
----
+Open the URL provided by Vite.
 
-## Status
+## Live Demo
 
-**Current status:** Initial project foundation completed.
+**Coming Soon**
 
-The project is currently under active development.
+The live deployment link will be added after deployment.
+
+## Team
+
+| Name                        | USN          |
+| --------------------------- | ------------ |
+| `Akanksha       `           | `4VP24CS006` |
+| `G Madhura Shatry`          | `4VP24CS035` |
+| `Muralikrishna D`           | `4VP24CS060` |
+| `Niveditha Marcopolo Totar` | `4VP24CS065` |
+
+## Future Scope
+
+- Adaptive friction based on scrolling behavior
+- Browser extension integration
+- Integration with actual short-form platforms
+- Personalized behavioral insights
+- Additional focus activities
+
+> **Earn your scroll. Control your attention.**
