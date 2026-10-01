@@ -87,7 +87,7 @@ CREATE TABLE brain_gym_questions (
         'C',
         'D'
     ) NOT NULL,
-
+    explanation TEXT NULL,
     difficulty ENUM(
         'easy',
         'medium',
@@ -149,6 +149,7 @@ CREATE TABLE scroll_sessions (
     started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ended_at TIMESTAMP NULL,
     duration_seconds INT NOT NULL DEFAULT 0,
+    allowed_seconds INT NOT NULL DEFAULT 0,
 
     intentionality ENUM(
         'intentional',

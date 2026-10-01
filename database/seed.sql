@@ -1,5 +1,5 @@
 INSERT INTO brain_gym_questions
-(domain, question, option_a, option_b, option_c, option_d, correct_answer, difficulty)
+(domain, question, option_a, option_b, option_c, option_d, correct_answer, explanation, difficulty)
 VALUES
 
 -- LOGIC
@@ -12,6 +12,7 @@ VALUES
     'Some flowers are not roses',
     'No roses are flowers',
     'B',
+    'If all roses are flowers, then it must be true that all roses are flowers.',
     'easy'
 ),
 
@@ -23,6 +24,7 @@ VALUES
     'C',
     'Cannot determine',
     'A',
+    'If A is taller than B and B is taller than C, then A is definitely the tallest.',
     'easy'
 ),
 
@@ -34,6 +36,7 @@ VALUES
     'Thursday',
     'Friday',
     'C',
+    'If today is Monday, then 17 days from today will be a Thursday.',
     'easy'
 ),
 
@@ -45,6 +48,7 @@ VALUES
     '90 degrees',
     '120 degrees',
     'C',
+    'A clock showing exactly 3:00 has the hour hand at 90 degrees and the minute hand at 0 degrees, creating a 90-degree angle.',
     'easy'
 ),
 
@@ -56,6 +60,7 @@ VALUES
     'No programmers are creative',
     'All creative people are programmers',
     'B',
+    'If some programmers are gamers and all gamers are creative, then some programmers are creative.',
     'medium'
 ),
 
@@ -69,6 +74,7 @@ VALUES
     '32',
     '36',
     'C',
+    'Each number is multiplied by 2 to get the next number.',
     'easy'
 ),
 
@@ -80,6 +86,7 @@ VALUES
     '48',
     '54',
     'C',
+    'Each number is multiplied by 2 to get the next number.',
     'easy'
 ),
 
@@ -91,6 +98,7 @@ VALUES
     '25',
     '30',
     'C',
+    'Each number is a perfect square (1², 2², 3², 4², 5²).',
     'easy'
 ),
 
@@ -102,6 +110,7 @@ VALUES
     '80',
     '90',
     'C',
+    'Each number is multiplied by 2 to get the next number.',
     'easy'
 ),
 
@@ -113,6 +122,7 @@ VALUES
     '30',
     '32',
     'C',
+    'If some programmers are gamers and all gamers are creative, then some programmers are creative.',
     'medium'
 ),
 
@@ -126,6 +136,7 @@ VALUES
     '30',
     '35',
     'C',
+    '15% of 200 is 30.',
     'easy'
 ),
 
@@ -137,6 +148,7 @@ VALUES
     '120',
     '130',
     'C',
+    '24 times 5 is 120.',
     'easy'
 ),
 
@@ -148,6 +160,7 @@ VALUES
     '12',
     '14',
     'C',
+    '144 divided by 12 is 12.',
     'easy'
 ),
 
@@ -159,6 +172,7 @@ VALUES
     '8',
     '9',
     'C',
+    'If x + 7 = 15, then x = 8.',
     'easy'
 ),
 
@@ -170,6 +184,7 @@ VALUES
     '25',
     '30',
     'B',
+    '25% of 80 is 20.',
     'medium'
 ),
 
@@ -183,6 +198,7 @@ VALUES
     '9',
     '4',
     'B',
+    'The second number in the sequence is 2.',
     'easy'
 ),
 
@@ -194,6 +210,7 @@ VALUES
     '1',
     '6',
     'C',
+    'The third number in the sequence is 1.',
     'easy'
 ),
 
@@ -205,6 +222,7 @@ VALUES
     'Chair',
     'Moon',
     'C',
+    'The third word in the sequence is Chair.',
     'easy'
 ),
 
@@ -216,6 +234,7 @@ VALUES
     '6',
     '8',
     'C',
+    'The last number in the sequence is 6.',
     'easy'
 ),
 
@@ -227,6 +246,7 @@ VALUES
     'Green',
     'Yellow',
     'B',
+    'The second color in the sequence is Blue.',
     'easy'
 ),
 
@@ -240,6 +260,7 @@ VALUES
     'APPEL',
     'APPLE',
     'C',
+    'The word "APPEL" is misspelled compared to the others.',
     'easy'
 ),
 
@@ -251,6 +272,7 @@ VALUES
     '2',
     '9',
     'B',
+    'The number 7 appears twice in the sequence.',
     'easy'
 ),
 
@@ -262,6 +284,7 @@ VALUES
     'A6B3 - A6B8',
     'X9Z2 - X9Z7',
     'A',
+    'The pair "K8M2 - K8M2" is exactly the same.',
     'easy'
 ),
 
@@ -273,6 +296,7 @@ VALUES
     'BOOK',
     'PHONE',
     'C',
+    'The word "BOOK" has 4 letters, while the others have 5.',
     'easy'
 ),
 
@@ -284,5 +308,6 @@ VALUES
     '24',
     '31',
     'D',
+    'The number 31 is odd, while the others are even.',
     'medium'
 );

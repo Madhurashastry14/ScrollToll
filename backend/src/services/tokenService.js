@@ -1,7 +1,7 @@
 const pool = require("../config/db");
 
-const getTokenBalance = async (userId) => {
-  const [rows] = await pool.query(
+const getTokenBalance = async (userId, connection = pool) => {
+  const [rows] = await connection.query(
     `SELECT balance
      FROM user_tokens
      WHERE user_id = ?`,
@@ -15,12 +15,12 @@ const getTokenBalance = async (userId) => {
   return rows[0].balance;
 };
 
-const addTokens = async (userId, amount) => {
+const addTokens = async (userId, amount, connection = pool) => {
   if (amount <= 0) {
     throw new Error("Token amount must be positive");
   }
 
-  const [result] = await pool.query(
+  const [result] = await connection.query(
     `UPDATE user_tokens
      SET balance = balance + ?
      WHERE user_id = ?`,
@@ -31,15 +31,15 @@ const addTokens = async (userId, amount) => {
     throw new Error("Token account not found");
   }
 
-  return getTokenBalance(userId);
+  return getTokenBalance(userId, connection);
 };
 
-const spendTokens = async (userId, amount) => {
+const spendTokens = async (userId, amount, connection = pool) => {
   if (amount <= 0) {
     throw new Error("Token amount must be positive");
   }
 
-  const [result] = await pool.query(
+  const [result] = await connection.query(
     `UPDATE user_tokens
      SET balance = balance - ?
      WHERE user_id = ?
@@ -51,7 +51,7 @@ const spendTokens = async (userId, amount) => {
     throw new Error("Insufficient tokens");
   }
 
-  return getTokenBalance(userId);
+  return getTokenBalance(userId, connection);
 };
 
 module.exports = {

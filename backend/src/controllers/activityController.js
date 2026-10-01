@@ -1,5 +1,7 @@
 const pool = require("../config/db");
+
 const { addTokens, getTokenBalance } = require("../services/tokenService");
+
 const startBrainGym = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -21,13 +23,13 @@ const startBrainGym = async (req, res) => {
 
     const [questions] = await pool.query(
       `SELECT
-        id,
-        question,
-        option_a,
-        option_b,
-        option_c,
-        option_d,
-        difficulty
+         id,
+         question,
+         option_a,
+         option_b,
+         option_c,
+         option_d,
+         difficulty
        FROM brain_gym_questions
        WHERE domain = ?
        ORDER BY RAND()
@@ -66,6 +68,8 @@ const startBrainGym = async (req, res) => {
 };
 
 const submitBrainGym = async (req, res) => {
+  let connection;
+
   try {
     const userId = req.user.userId;
     const { attemptId, answers } = req.body;
@@ -76,15 +80,28 @@ const submitBrainGym = async (req, res) => {
       });
     }
 
-    const [attempts] = await pool.query(
-      `SELECT id, domain, question_ids, completed
+    connection = await pool.getConnection();
+
+    await connection.beginTransaction();
+
+    const [attempts] = await connection.query(
+      `SELECT
+         id,
+         domain,
+         question_ids,
+         completed
        FROM brain_gym_attempts
        WHERE id = ?
-         AND user_id = ?`,
+         AND user_id = ?
+       FOR UPDATE`,
       [attemptId, userId],
     );
 
     if (attempts.length === 0) {
+      await connection.rollback();
+      connection.release();
+      connection = null;
+
       return res.status(404).json({
         message: "Brain Gym attempt not found",
       });
@@ -93,6 +110,10 @@ const submitBrainGym = async (req, res) => {
     const attempt = attempts[0];
 
     if (attempt.completed) {
+      await connection.rollback();
+      connection.release();
+      connection = null;
+
       return res.status(400).json({
         message: "This Brain Gym attempt has already been completed",
       });
@@ -104,12 +125,20 @@ const submitBrainGym = async (req, res) => {
         : attempt.question_ids;
 
     if (!Array.isArray(questionIds) || questionIds.length !== 3) {
+      await connection.rollback();
+      connection.release();
+      connection = null;
+
       return res.status(400).json({
         message: "Invalid Brain Gym question set",
       });
     }
 
     if (answers.length !== questionIds.length) {
+      await connection.rollback();
+      connection.release();
+      connection = null;
+
       return res.status(400).json({
         message: "All Brain Gym questions must be answered",
       });
@@ -122,6 +151,10 @@ const submitBrainGym = async (req, res) => {
     const uniqueQuestionIds = new Set(submittedQuestionIds);
 
     if (uniqueQuestionIds.size !== questionIds.length) {
+      await connection.rollback();
+      connection.release();
+      connection = null;
+
       return res.status(400).json({
         message: "Each Brain Gym question can only be answered once",
       });
@@ -132,6 +165,10 @@ const submitBrainGym = async (req, res) => {
     );
 
     if (!allQuestionsBelongToAttempt) {
+      await connection.rollback();
+      connection.release();
+      connection = null;
+
       return res.status(400).json({
         message: "Invalid Brain Gym question submitted",
       });
@@ -142,28 +179,36 @@ const submitBrainGym = async (req, res) => {
     );
 
     if (!allAnswersValid) {
+      await connection.rollback();
+      connection.release();
+      connection = null;
+
       return res.status(400).json({
         message: "Invalid answer submitted",
       });
     }
 
-    const [questions] = await pool.query(
+    const [questions] = await connection.query(
       `SELECT
-        id,
-        question,
-        option_a,
-        option_b,
-        option_c,
-        option_d,
-        correct_answer,
-        explanation,
-        difficulty
+         id,
+         question,
+         option_a,
+         option_b,
+         option_c,
+         option_d,
+         correct_answer,
+         explanation,
+         difficulty
        FROM brain_gym_questions
        WHERE id IN (?)`,
       [questionIds],
     );
 
     if (questions.length !== questionIds.length) {
+      await connection.rollback();
+      connection.release();
+      connection = null;
+
       return res.status(500).json({
         message: "Some Brain Gym questions could not be found",
       });
@@ -209,21 +254,31 @@ const submitBrainGym = async (req, res) => {
       Math.floor((correctAnswers / questionsAnswered) * 5),
     );
 
-    await pool.query(
+    await connection.query(
       `INSERT INTO brain_gym_sessions
-       (user_id, questions_answered, correct_answers, completed)
+       (
+         user_id,
+         questions_answered,
+         correct_answers,
+         completed
+       )
        VALUES (?, ?, ?, TRUE)`,
       [userId, questionsAnswered, correctAnswers],
     );
 
-    const newBalance = await addTokens(userId, tokensEarned);
+    const newBalance = await addTokens(userId, tokensEarned, connection);
 
-    await pool.query(
+    await connection.query(
       `UPDATE brain_gym_attempts
        SET completed = TRUE
        WHERE id = ?`,
       [attemptId],
     );
+
+    await connection.commit();
+
+    connection.release();
+    connection = null;
 
     res.status(200).json({
       message: "Brain Gym completed",
@@ -237,6 +292,16 @@ const submitBrainGym = async (req, res) => {
       },
     });
   } catch (error) {
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rollbackError) {
+        console.error("Brain Gym rollback error:", rollbackError);
+      }
+
+      connection.release();
+    }
+
     console.error("Brain Gym submission error:", error);
 
     res.status(500).json({
@@ -244,6 +309,7 @@ const submitBrainGym = async (req, res) => {
     });
   }
 };
+
 const completeFocusForge = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -336,6 +402,7 @@ const completeFocusForge = async (req, res) => {
     });
   }
 };
+
 const completeMindfulMinute = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -485,6 +552,7 @@ const completeFocusGame = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   startBrainGym,
   submitBrainGym,

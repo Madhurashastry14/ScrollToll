@@ -93,6 +93,14 @@ function FocusGame() {
     setCurrentRound((previous) => previous + 1);
     setRoundFinished(false);
   };
+  const handlePlayAgain = () => {
+    setCurrentRound(1);
+    setRoundsCompleted(0);
+    setRoundFinished(false);
+    setSubmitting(false);
+    setReward(null);
+    setError("");
+  };
 
   const finishGame = async (finalRoundsCompleted) => {
     try {
@@ -160,7 +168,7 @@ function FocusGame() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
-                onClick={() => navigate(`/focus-forge/${gameId}`)}
+                onClick={handlePlayAgain}
                 className="flex-1 inline-flex items-center justify-center rounded-xl bg-gray-900 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-gray-800"
               >
                 Play Again
