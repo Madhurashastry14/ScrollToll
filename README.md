@@ -37,26 +37,22 @@ This creates a deliberate decision before entering a scrolling session.
 
 ## Tech Stack
 
-**Frontend:** React, Vite, JavaScript, Tailwind CSS, React Router
-
-**Backend:** Node.js, Express.js, REST API, JWT Authentication, bcrypt
-
-**Database:** MySQL
-
-**External API:** YouTube Data API v3
-
-**Tools:** Git, GitHub, GitHub Actions
+| Category               | Technologies / Tools                                      |
+| ---------------------- | --------------------------------------------------------- | --- |
+| **Frontend**           | React, Vite, JavaScript, Tailwind CSS, React Router       |
+| **Backend**            | Node.js, Express.js, REST API, JWT Authentication, bcrypt |
+| **Database**           | MySQL                                                     |
+| **External API**       | YouTube Data API v3                                       |
+| **Tools & Deployment** | Git, GitHub, GitHub Actions, Render, Aiven                |     |
 
 ## Project Structure
 
 scrolltoll/
 ├── .github/
 │ └── workflows/
-│
 ├── database/
 │ ├── schema.sql
 │ └── seed.sql
-│
 ├── backend/
 │ ├── src/
 │ │ ├── config/
@@ -66,7 +62,6 @@ scrolltoll/
 │ │ ├── services/
 │ │ └── server.js
 │ └── package.json
-│
 ├── frontend/
 │ ├── public/
 │ ├── src/
@@ -74,9 +69,8 @@ scrolltoll/
 │ │ ├── context/
 │ │ ├── layouts/
 │ │ ├── pages/
-│ │ ├── services/s
+│ │ └── services/
 │ └── package.json
-│
 ├── .gitignore
 └── README.md
 
@@ -167,16 +161,14 @@ Open the URL provided by Vite.
 
 ## Live Demo
 
-**Coming Soon**
-
-The live deployment link will be added after deployment.
+[**Visit ScrollToll →**](https://scrolltoll-frontend.onrender.com)
 
 ## Team
 
 | Name                        | USN          |
 | --------------------------- | ------------ |
 | `Akanksha       `           | `4VP24CS006` |
-| `G Madhura Shatry`          | `4VP24CS035` |
+| `G Madhura Shastry`         | `4VP24CS035` |
 | `Muralikrishna D`           | `4VP24CS060` |
 | `Niveditha Marcopolo Totar` | `4VP24CS065` |
 
@@ -187,5 +179,3 @@ The live deployment link will be added after deployment.
 - Integration with actual short-form platforms
 - Personalized behavioral insights
 - Additional focus activities
-
-> **Earn your scroll. Control your attention.**
