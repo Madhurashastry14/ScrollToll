@@ -49,7 +49,7 @@ This creates a deliberate decision before entering a scrolling session.
 
 ## Project Structure
 
-````text
+```text
 scrolltoll/
 ├── .github/
 │   └── workflows/
@@ -76,6 +76,7 @@ scrolltoll/
 │   └── package.json
 ├── .gitignore
 └── README.md
+```
 
 ## Getting Started
 
@@ -92,7 +93,7 @@ scrolltoll/
 ```bash
 git clone <REPOSITORY_URL>
 cd <REPOSITORY_NAME>
-````
+```
 
 ### 2. Set Up the Database
 
