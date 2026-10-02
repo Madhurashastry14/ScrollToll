@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
@@ -42,6 +42,174 @@ function ScrollFeed() {
   const [sessionId, setSessionId] = useState(null);
   const [scrollReason, setScrollReason] = useState("");
 
+  // YouTube & Player State Refs
+  const playerInstancesRef = useRef(new Map());
+  const activeVideoIdRef = useRef(null);
+  const containerRef = useRef(null);
+  const articleRefs = useRef(new Map());
+
+  // Helper to pause all players except the specified one
+  const pauseAllExcept = useCallback((activeId) => {
+    playerInstancesRef.current.forEach((player, id) => {
+      if (id !== activeId) {
+        try {
+          if (player && typeof player.pauseVideo === "function") {
+            player.pauseVideo();
+          }
+        } catch (e) {
+          console.error("Error pausing player:", e);
+        }
+      }
+    });
+  }, []);
+
+  // Initialize YouTube IFrame API and players when session starts and videos are ready
+  useEffect(() => {
+    if (!sessionStarted || videos.length === 0) return;
+
+    let isMounted = true;
+
+    const initPlayers = () => {
+      if (!window.YT || !window.YT.Player) return;
+
+      videos.forEach((video) => {
+        const containerId = `yt-player-${video.videoId}`;
+        const el = document.getElementById(containerId);
+        if (!el || playerInstancesRef.current.has(video.videoId)) return;
+
+        try {
+          const player = new window.YT.Player(containerId, {
+            videoId: video.videoId,
+            height: "100%",
+            width: "100%",
+            playerVars: {
+              autoplay: 0,
+              controls: 1,
+              disablekb: 0,
+              fs: 0,
+              iv_load_policy: 3,
+              modestbranding: 1,
+              playsinline: 1,
+              rel: 0,
+            },
+            events: {
+              onReady: (event) => {
+                if (!isMounted) return;
+                // If this video is currently the active/visible one, play it (unmuted)
+                if (activeVideoIdRef.current === video.videoId) {
+                  try {
+                    event.target.playVideo();
+                  } catch (err) {
+                    console.error("Error auto-playing initial video:", err);
+                  }
+                }
+              },
+              onStateChange: (event) => {
+                if (!isMounted) return;
+                // Enforce "one player only" when any player starts playing
+                if (window.YT && event.data === window.YT.PlayerState.PLAYING) {
+                  activeVideoIdRef.current = video.videoId;
+                  pauseAllExcept(video.videoId);
+                }
+              },
+            },
+          });
+
+          playerInstancesRef.current.set(video.videoId, player);
+        } catch (err) {
+          console.error("Failed to create YT.Player for", video.videoId, err);
+        }
+      });
+    };
+
+    // Load API script if not present
+    if (!window.YT || !window.YT.Player) {
+      if (!document.getElementById("youtube-iframe-api")) {
+        const tag = document.createElement("script");
+        tag.id = "youtube-iframe-api";
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName("script")[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      }
+
+      window.onYouTubeIframeAPIReady = () => {
+        if (isMounted) {
+          initPlayers();
+        }
+      };
+    } else {
+      const timer = setTimeout(() => {
+        if (isMounted) initPlayers();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [sessionStarted, videos, pauseAllExcept]);
+
+  // IntersectionObserver to track the currently visible video on scroll
+  useEffect(() => {
+    if (!sessionStarted || videos.length === 0) return;
+
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const videoId = entry.target.getAttribute("data-video-id");
+          if (videoId && activeVideoIdRef.current !== videoId) {
+            activeVideoIdRef.current = videoId;
+            pauseAllExcept(videoId);
+
+            const player = playerInstancesRef.current.get(videoId);
+            if (player && typeof player.playVideo === "function") {
+              try {
+                player.playVideo();
+              } catch (err) {
+                console.error("Error playing active video:", err);
+              }
+            }
+          }
+        }
+      });
+    };
+
+    const observerOptions = {
+      root: containerRef.current,
+      threshold: 0.6,
+    };
+
+    const observer = new IntersectionObserver(
+      observerCallback,
+      observerOptions,
+    );
+
+    articleRefs.current.forEach((articleEl) => {
+      if (articleEl) observer.observe(articleEl);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [sessionStarted, videos, pauseAllExcept]);
+
+  // Cleanup players on session exit
+  useEffect(() => {
+    if (!sessionStarted) {
+      playerInstancesRef.current.forEach((player) => {
+        try {
+          if (player && typeof player.destroy === "function") {
+            player.destroy();
+          }
+        } catch (e) {
+          console.error("Error destroying player:", e);
+        }
+      });
+      playerInstancesRef.current.clear();
+      activeVideoIdRef.current = null;
+    }
+  }, [sessionStarted]);
+
   useEffect(() => {
     const loadVideos = async () => {
       try {
@@ -49,8 +217,10 @@ function ScrollFeed() {
         setVideoError("");
 
         const data = await apiRequest("/videos?query=science facts shorts");
-
         setVideos(data.videos);
+        if (data.videos && data.videos.length > 0) {
+          activeVideoIdRef.current = data.videos[0].videoId;
+        }
       } catch (err) {
         console.error("Failed to load videos:", err);
         setVideoError(err.message);
@@ -148,6 +318,9 @@ function ScrollFeed() {
       setSessionId(data.sessionId);
       setRemainingSeconds(selectedMinutes * 60);
       setSessionStarted(true);
+      if (videos.length > 0) {
+        activeVideoIdRef.current = videos[0].videoId;
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -342,7 +515,10 @@ function ScrollFeed() {
         </button>
       </header>
 
-      <main className="h-[calc(100vh-73px)] snap-y snap-mandatory overflow-y-auto">
+      <main
+        ref={containerRef}
+        className="h-[calc(100vh-73px)] snap-y snap-mandatory overflow-y-auto"
+      >
         {videosLoading && (
           <div
             className="flex h-full items-center justify-center gap-2.5"
@@ -375,19 +551,21 @@ function ScrollFeed() {
           videos.map((video) => (
             <article
               key={video.videoId}
-              className="relative h-[calc(100vh-73px)] snap-start bg-black"
+              ref={(el) => {
+                if (el) articleRefs.current.set(video.videoId, el);
+                else articleRefs.current.delete(video.videoId);
+              }}
+              data-video-id={video.videoId}
+              className="relative h-[calc(100vh-73px)] snap-start bg-black flex items-center justify-center"
             >
-              <div className="absolute inset-0">
-                <iframe
-                  src={`${video.embedUrl}?rel=0`}
-                  title={video.title}
-                  className="h-full w-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
+              <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                <div
+                  id={`yt-player-${video.videoId}`}
+                  className="h-full w-full pointer-events-auto"
                 />
               </div>
 
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-5 pt-24 sm:p-6">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-5 pt-24 sm:p-6 z-10">
                 <h2 className="max-w-lg text-base font-semibold leading-snug sm:text-lg">
                   {video.title}
                 </h2>
