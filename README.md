@@ -37,40 +37,43 @@ This creates a deliberate decision before entering a scrolling session.
 
 ## Tech Stack
 
+## Tech Stack
+
 | Category               | Technologies / Tools                                      |
-| ---------------------- | --------------------------------------------------------- | --- |
+| ---------------------- | --------------------------------------------------------- |
 | **Frontend**           | React, Vite, JavaScript, Tailwind CSS, React Router       |
 | **Backend**            | Node.js, Express.js, REST API, JWT Authentication, bcrypt |
 | **Database**           | MySQL                                                     |
 | **External API**       | YouTube Data API v3                                       |
-| **Tools & Deployment** | Git, GitHub, GitHub Actions, Render, Aiven                |     |
+| **Tools & Deployment** | Git, GitHub, GitHub Actions, Render, Aiven                |
 
 ## Project Structure
 
+````text
 scrolltoll/
 ├── .github/
-│ └── workflows/
+│   └── workflows/
 ├── database/
-│ ├── schema.sql
-│ └── seed.sql
+│   ├── schema.sql
+│   └── seed.sql
 ├── backend/
-│ ├── src/
-│ │ ├── config/
-│ │ ├── controllers/
-│ │ ├── middleware/
-│ │ ├── routes/
-│ │ ├── services/
-│ │ └── server.js
-│ └── package.json
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── server.js
+│   └── package.json
 ├── frontend/
-│ ├── public/
-│ ├── src/
-│ │ ├── components/
-│ │ ├── context/
-│ │ ├── layouts/
-│ │ ├── pages/
-│ │ └── services/
-│ └── package.json
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   └── services/
+│   └── package.json
 ├── .gitignore
 └── README.md
 
@@ -89,7 +92,7 @@ scrolltoll/
 ```bash
 git clone <REPOSITORY_URL>
 cd <REPOSITORY_NAME>
-```
+````
 
 ### 2. Set Up the Database
 
